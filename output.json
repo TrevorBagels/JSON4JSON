@@ -1,0 +1,59 @@
+{
+    "apiKey": "google maps api key",
+    "pushoverToken": "pushover application token",
+    "pushoverUser": "pushover user token",
+    "headless": true,
+    "speed": 1,
+    "scanInterval": 60.0,
+    "timeout": 10,
+    "radiusDefault": "100m",
+    "ignoreRecent": false,
+    "skipAnalysis": false,
+    "agencies": [
+        {
+            "name": "Tualatin Valley Fire & Rescue (OR)",
+            "scanInterval": 60.0
+        },
+        {
+            "name": "Portland Fire & Rescue (OR)",
+            "scanInterval": 300.0
+        }
+    ],
+    "testdict": {
+        "name": "test",
+        "coords": [
+            45.50812524740005,
+            -122.77920997189283
+        ],
+        "_note": "latitude comes before longitude.",
+        "radius": 2000.0,
+        "address": "",
+        "importance": 1
+    },
+    "locations": [
+        {
+            "name": "test",
+            "coords": [
+                45.50812524740005,
+                -122.77920997189283
+            ],
+            "_note": "latitude comes before longitude.",
+            "radius": 2000.0,
+            "address": "",
+            "importance": 1
+        },
+        {
+            "name": "test 2",
+            "match": "VANCOUVER AVE",
+            "importance": 3,
+            "address": "",
+            "coords": [],
+            "radius": 0.0
+        }
+    ],
+    "logging": "none",
+    "testProperty": 60.0,
+    "typeFilters": [
+        "*"
+    ]
+}

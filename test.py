@@ -1,7 +1,7 @@
-from advancedJSON import AdvancedJSON
+from JSON4JSON import JSON4JSON
 import json
 
-config = AdvancedJSON()
+config = JSON4JSON()
 
 config.load("config.json", "rules.json")
 print("\n\n")

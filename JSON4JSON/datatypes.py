@@ -1,4 +1,4 @@
-from utils import seperate_string_number
+from .utils import seperate_string_number
 import math
 
 class DataTypes:

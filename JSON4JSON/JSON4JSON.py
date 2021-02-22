@@ -1,10 +1,10 @@
 import json, os, sys, traceback
-from datatypes import DataTypes
-from utils import seperate_string_number
+from .datatypes import DataTypes
+from .utils import seperate_string_number
 #region utils from the internet
 #can't remember where I stole this from, somewhere on stack overflow.
 #endregion
-class AdvancedJSON:
+class JSON4JSON:
 	def __init__(self):
 		self.dataTypes = {}
 		self.vars = {}

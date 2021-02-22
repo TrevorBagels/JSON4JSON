@@ -19,7 +19,6 @@ class unit:
 		if skipRuleConversion == False:
 			if "unit" in rule:
 				unitToUse = rule['unit']
-		print(unitToUse, useUnit)
 		if useUnit != "none":
 			unitToUse = useUnit
 		

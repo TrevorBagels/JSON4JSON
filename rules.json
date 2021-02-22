@@ -4,6 +4,7 @@
 	"//@unit": "used to tell the config what units to use as the defaults. This property isn't required, but can be used to override default settings.",
 	"//info": "t: data type. d: default value. r: requried (default false).",
 	"someNumber": {"t": "number", "int": true, "min": 300, "max": 850},
+	"radiusDefault": {"t": "distance", "d": "50m", "varSet": "radiusDefault"},
 	"apiKey" : {"t": "string", "d": "YOUR_KEY_HERE", "r": true},
 	"headless" : {"t": "bool", "d": true},
 	"logging": {"t": "choice", "d": "none", "options": ["none", "errors", "verbose"]},
@@ -30,7 +31,7 @@
 				"name": {"t": "string", "r": true},
 				"address": {"t": "string"},
 				"coords": {"t": "array", "minLength": 2, "maxLength": 2, "autoAdd": false, "rule": {"t": "number"}},
-				"radius": {"t": "distance", "autoAdd": false},
+				"radius": {"t": "distance", "autoAdd": true, "d": "$$radiusDefault"},
 				"importance": {"t": "number", "int": true, "d":1, "autoAdd": true}
 			}			
 		}

@@ -6,7 +6,7 @@
     "speed": 1,
     "scanInterval": 60.0,
     "timeout": 10,
-    "radiusDefault": "100m",
+    "radiusDefault": 100.0,
     "ignoreRecent": false,
     "someNumber": 305,
     "skipAnalysis": false,
@@ -38,7 +38,7 @@
             "importance": 3,
             "address": "",
             "coords": [],
-            "radius": 0.0
+            "radius": 100.0
         }
     ],
     "logging": "none",

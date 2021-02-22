@@ -74,5 +74,9 @@ class arrayType:
 	def convert(self, data, rules):#this ones different, since it's a dictionary, therefore it has multiple values of different types (including other dictionaries/objects)
 		for x,i in zip(data, range(0, len(data))):
 			#convert single
-			data[i] = self.ajson.convertSingle(x, rules['rule'])
+			usedRule = rules['rule']
+			#check if we have any custom defined rules
+			if f"rule#{i}" in rules:
+				usedRule = rules[f'rule#{i}']
+			data[i] = self.ajson.convertSingle(x, usedRule)
 		return data

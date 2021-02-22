@@ -30,7 +30,7 @@
 			"rules":{
 				"name": {"t": "string", "r": true},
 				"address": {"t": "string"},
-				"coords": {"t": "array", "minLength": 2, "maxLength": 2, "autoAdd": false, "rule": {"t": "number"}},
+				"coords": {"t": "array", "minLength": 2, "maxLength": 2, "autoAdd": false, "rule": {"t": "number"}, "rule#0": {"t": "number", "min": -90, "max": 90}, "rule#1": {"t": "number", "min": -180, "max": 180}},
 				"radius": {"t": "distance", "autoAdd": true, "d": "$$radiusDefault"},
 				"importance": {"t": "number", "int": true, "d":1, "autoAdd": true}
 			}			

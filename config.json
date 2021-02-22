@@ -8,6 +8,7 @@
 	"timeout": 10,
 	"radiusDefault": "100m",
 	"ignoreRecent": false,
+	"someNumber": "305.7//this will be converted from a string to a number (I think)",
 	"skipAnalysis": false,
 	"agencies" : [
 		{
@@ -18,12 +19,6 @@
 			"scanInterval" : "5m"
 		}
 	],
-	"testdict": {
-				"name" : "test",
-				"coords" : [45.50812524740005, -122.77920997189283],
-				"_note" : "latitude comes before longitude.",
-				"radius": "2km"
-			},
 	"locations" : [
 		{
 			"name" : "test",

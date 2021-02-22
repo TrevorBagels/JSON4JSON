@@ -37,21 +37,9 @@ class AdvancedJSON:
 	def convertAll(self, data, rules): #data: dictionary (right after loading json), rules: dictionary from the raw json stuff...
 		#start by setting up
 		#hmmm maybe we should just use the conversion from datatypes.dicttype. unify everything, yknow
-		for key in rules:
-			if key.startswith("//"): #ignore, this is a comment
-				continue
-			if key[0] == "@": #this overrides default settings
-				self.set_value(self.defaults, key.split("@")[1], rules[key])
-				continue
-			if key not in data:
-				self.log(f"Key \"{key}\" not in data file. Setting to default.", level=-2)
-				data[key] = self.getDefault(rules[key])
-			#check if this makes a variable. if so, set the variable to the value.
-			if "varSet" in rules[key]:
-				self.log(f"Setting variable {rules[key]['varSet']}", level=-1)
-				self.vars[rules[key]['varSet']] = data[key]
-			data[key] = self.convertSingle(data[key], rules[key])
-		self.data = data
+		#yes
+		
+		self.data = self.convertSingle(data, {"t": "object", "rules": rules})
 	
 	def log(self, *args, **kw):
 		level = kw.get('level', 0)
@@ -71,6 +59,13 @@ class AdvancedJSON:
 		#data is the actual data, rule is the rule OBJECT for this. first, make sure the data type matches with the rule
 		expectedType = self.getProperty(rule, "t", noneFound="any")
 		data = self.testVar(data)
+		#allow comments on property values
+		if type(data) == str:
+			try:
+				data = data.split("//")[0]
+			except:
+				pass
+		
 		#istype?
 		if expectedType in self.dataTypes:
 			isValid = self.dataTypes[expectedType].matches(data)
@@ -86,7 +81,6 @@ class AdvancedJSON:
 			return rule["d"]
 		if "t" not in rule:
 			rule['t'] = self.defaults['t'] #default is "string"
-		self.log(rule)
 		return self.dataTypes[rule['t']].default
 	
 	def testVar(self, value):#run pretty much every value through this function in case it's a ref to a variable

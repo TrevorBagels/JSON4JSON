@@ -4,6 +4,6 @@ import json
 config = AdvancedJSON()
 
 config.load("config.json", "rules.json")
-print(config.data)
-print(config.vars)
+print("\n\n")
+print("variables:", config.vars)
 json.dump(config.data, open("./output.json", "w+"), indent=4)

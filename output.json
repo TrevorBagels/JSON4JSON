@@ -8,6 +8,7 @@
     "timeout": 10,
     "radiusDefault": "100m",
     "ignoreRecent": false,
+    "someNumber": 305,
     "skipAnalysis": false,
     "agencies": [
         {
@@ -19,17 +20,6 @@
             "scanInterval": 300.0
         }
     ],
-    "testdict": {
-        "name": "test",
-        "coords": [
-            45.50812524740005,
-            -122.77920997189283
-        ],
-        "_note": "latitude comes before longitude.",
-        "radius": 2000.0,
-        "address": "",
-        "importance": 1
-    },
     "locations": [
         {
             "name": "test",

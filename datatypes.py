@@ -21,7 +21,12 @@ class DataTypes:
 			self.default = 0
 		#returns true/false, whether or not the data is this type
 		def matches(self, data):
-			return type(data) == float or type(data) == int
+			newData = data
+			try:
+				newData = float(data)
+			except:
+				return False
+			return type(newData) == float or type(newData) == int
 		def convert(self, data, rule):
 			value = float(data)
 			minval = self.ajson.getProperty(rule, "min", noneFound=-math.inf)
@@ -89,7 +94,6 @@ class DataTypes:
 				return True
 			return False
 		def convert(self, data, rules):#this ones different, since it's a dictionary, therefore it has multiple values of different types (including other dictionaries/objects)
-			self.ajson.log("CONVERT ARRAY", rules)
 			for x,i in zip(data, range(0, len(data))):
 				#convert single
 				data[i] = self.ajson.convertSingle(x, rules['rule'])
@@ -106,12 +110,23 @@ class DataTypes:
 				return True
 			return False
 		def convert(self, data, rules):#this ones different, since it's a dictionary, therefore it has multiple values of different types (including other dictionaries/objects)
-			self.ajson.log("CONVERT DICT")
-			for key in rules['rules']:
+			oldRules = rules
+			rules = oldRules['rules']
+			for key in rules:
+				if key.startswith("//"): #ignore, this is a comment
+					continue
+				if key[0] == "@": #this overrides default settings
+					self.ajson.set_value(self.ajson.defaults, key.split("@")[1], rules[key])
+					continue
 				if key not in data:
-					self.ajson.log(f"Key \"{key}\" not in data file. Setting to default.")
-					data[key] = self.ajson.getDefault(rules['rules'][key])
-				data[key] = self.ajson.convertSingle(data[key], rules['rules'][key])
+					self.ajson.log(f"Key \"{key}\" not in data file. Setting to default.", level=-2)
+					data[key] = self.ajson.getDefault(rules[key])
+				#check if this makes a variable. if so, set the variable to the value.
+				if "varSet" in rules[key]:
+					self.ajson.log(f"Setting variable {rules[key]['varSet']}", level=-1)
+					self.ajson.vars[rules[key]['varSet']] = data[key]
+				data[key] = self.ajson.convertSingle(data[key], rules[key])
+			
 			return data
 		
 	allTypes = [anyType, string, number, boolean, time, dictType, distance, arrayType]

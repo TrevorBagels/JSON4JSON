@@ -3,14 +3,7 @@
 	"@logging": 0,
 	"//@unit": "used to tell the config what units to use as the defaults. This property isn't required, but can be used to override default settings.",
 	"//info": "t: data type. d: default value. r: requried (default false).",
-	"testdict": {"t": "object", "r": true, "rules":{
-		"name": {"t": "string", "r": true},
-		"address": {"t": "string"},
-		"coords": {"t": "number", "array": true, "minLength": 2, "maxLength": 2, "autoAdd": false},
-		"radius": {"t": "distance", "autoAdd": false},
-		"importance": {"t": "number", "int": true, "d":1, "autoAdd": true}
-		}
-	},
+	"someNumber": {"t": "number", "int": true, "min": 300, "max": 850},
 	"apiKey" : {"t": "string", "d": "YOUR_KEY_HERE", "r": true},
 	"headless" : {"t": "bool", "d": true},
 	"logging": {"t": "choice", "d": "none", "options": ["none", "errors", "verbose"]},

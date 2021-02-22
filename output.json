@@ -41,7 +41,6 @@
             "match": "VANCOUVER AVE",
             "importance": 3,
             "address": "",
-            "coords": [],
             "radius": 100.0
         }
     ],

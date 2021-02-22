@@ -18,12 +18,13 @@ class dictType:
 			if key[0] == "@": #this overrides default settings
 				self.ajson.set_value(self.ajson.defaults, key.split("@")[1], rules[key])
 				continue
-			if key not in data:
+			if key not in data and self.ajson.getProperty(rules[key], "autoAdd", noneFound=self.ajson.defaults['autoAdd']):
 				self.ajson.log(f"Key \"{key}\" not in data file. Setting to default.", level=-2)
 				data[key] = self.ajson.getDefault(rules[key])
 			#check if this makes a variable. if so, set the variable to the value.
 			if "varSet" in rules[key]:
 				self.ajson.log(f"Setting variable {rules[key]['varSet']}", level=-1)
 				self.ajson.vars[rules[key]['varSet']] = data[key]
-			data[key] = self.ajson.convertSingle(data[key], rules[key])
+			if key in data:
+				data[key] = self.ajson.convertSingle(data[key], rules[key])
 		return data

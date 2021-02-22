@@ -63,6 +63,8 @@ class boolean:
 		return type(data) == bool
 	def convert(self, data, rule):
 		return data == True
+
+
 class arrayType:
 	def __init__(self, ajson):
 		self.name = "array"
@@ -73,7 +75,14 @@ class arrayType:
 		if type(data) == list:
 			return True
 		return False
-	def convert(self, data, rules):#this ones different, since it's a dictionary, therefore it has multiple values of different types (including other dictionaries/objects)
+	def convert(self, data, rules):
+		#length
+		minLength = self.ajson.getProperty(rules, "minLength", noneFound=0)
+		maxLength = self.ajson.getProperty(rules, "maxLength", noneFound=math.inf)
+		if len(data) < minLength:
+			self.ajson.log("Array too short!", error=True)
+		if len(data) > maxLength:
+			data = data[:maxLength]
 		for x,i in zip(data, range(0, len(data))):
 			#convert single
 			usedRule = rules['rule']

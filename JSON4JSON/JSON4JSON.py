@@ -10,7 +10,7 @@ class JSON4JSON:
 			"unit": {"time": "s", "distance": "m"},
 			"autoAdd": True,
 			"t": "string",
-			"logging": 5,
+			"logging": 4, #logs warnings (4) and errors (5)
 			"tracebackLogging": True
 		}
 		self.data = {} #this is the loaded and mostly filtered data
@@ -36,15 +36,25 @@ class JSON4JSON:
 	
 	def log(self, *args, **kw):
 		level = kw.get('level', 0)
+		error = kw.get('error', False)
+		warning = kw.get('warning', False)
+		if error:
+			level = 5
+		if warning:
+			level = 4
+		
 		if self.defaults['logging'] > level:
 			return
+		
 		out = kw.get('file',sys.stdout)
 		linesep= kw.get('end','\n')
 		colsep= kw.get('sep',' ')
+
 		tb = traceback.format_stack()
 		tbtxt = "\n" + tb[len(tb)-2].split("\n")[0] + "\n"
 		if self.defaults['tracebackLogging'] == False:
 			tbtxt = ""
+		
 		out.write(tbtxt + colsep.join(map(str,args)))
 		out.write(linesep)
 	
@@ -58,7 +68,6 @@ class JSON4JSON:
 				data = data.split("//")[0]
 			except:
 				pass
-		
 		#istype?
 		if expectedType in self.dataTypes:
 			isValid = self.dataTypes[expectedType].matches(data)

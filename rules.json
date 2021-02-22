@@ -8,7 +8,7 @@
 	"apiKey" : {"t": "string", "d": "YOUR_KEY_HERE", "r": true},
 	"headless" : {"t": "bool", "d": true},
 	"logging": {"t": "choice", "d": "none", "options": ["none", "errors", "verbose"]},
-	"scanInterval" : {"t": "time", "d": "60s", "varSet": "scanIntervalDefault"},
+	"scanInterval" : {"t": "time", "d": "60s", "varSet": "scanIntervalDefault", "unit": "ms"},
 	"testProperty": {"t": "time", "d": "$$scanIntervalDefault"},
 	"//varset" : "varSet is used to make it so that whatever value this property is set to also turns into a variable.",
 	"agencies" : {"t": "array", "r": true, "minLength": 1, "d": [], 

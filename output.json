@@ -4,7 +4,7 @@
     "pushoverUser": "pushover user token",
     "headless": true,
     "speed": 1,
-    "scanInterval": 60.0,
+    "scanInterval": 60000.0,
     "timeout": 10,
     "radiusDefault": 100.0,
     "ignoreRecent": false,

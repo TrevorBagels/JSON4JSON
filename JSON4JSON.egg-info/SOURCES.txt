@@ -1,0 +1,14 @@
+README.md
+setup.py
+JSON4JSON/JSON4JSON.py
+JSON4JSON/__init__.py
+JSON4JSON/utils.py
+JSON4JSON.egg-info/PKG-INFO
+JSON4JSON.egg-info/SOURCES.txt
+JSON4JSON.egg-info/dependency_links.txt
+JSON4JSON.egg-info/top_level.txt
+JSON4JSON/DataTypes/DefaultTypes.py
+JSON4JSON/DataTypes/__init__.py
+JSON4JSON/DataTypes/basics.py
+JSON4JSON/DataTypes/dictType.py
+JSON4JSON/DataTypes/units.py

@@ -12,7 +12,7 @@ setup(
 	url = "https://github.com/TrevorBagels/JSON4JSON",
 	license = "GNU GPLv3",
 	classifiers=[
-		"License :: OSI Approved :: GPLv3",
+		"License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
 		"Programming Language :: Python :: 3",
 		"Programming Language :: Python :: 3.7",
     ],
@@ -21,3 +21,7 @@ setup(
 	packages=find_packages(),
 	include_package_data=True
 )
+
+#notes for building and releasing
+#python3 -m build
+#python3 -m twine upload --repository pypi dist/*

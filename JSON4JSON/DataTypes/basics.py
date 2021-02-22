@@ -35,6 +35,8 @@ class number:
 		value = float(data)
 		minval = self.ajson.getProperty(rule, "min", noneFound=-math.inf)
 		maxval = self.ajson.getProperty(rule, "max", noneFound=math.inf)
+		multiplier = float(self.ajson.getProperty(rule, "multiplier", noneFound=1))
+		value *= multiplier
 		isInt = self.ajson.getProperty(rule, "int", noneFound=False)
 		if isInt:
 			value = int(value)

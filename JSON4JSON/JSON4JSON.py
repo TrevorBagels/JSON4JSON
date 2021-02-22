@@ -1,9 +1,7 @@
 import json, os, sys, traceback
-from .datatypes import DataTypes
 from .utils import seperate_string_number
-#region utils from the internet
-#can't remember where I stole this from, somewhere on stack overflow.
-#endregion
+from .DataTypes import DefaultTypes
+
 class JSON4JSON:
 	def __init__(self):
 		self.dataTypes = {}
@@ -16,12 +14,10 @@ class JSON4JSON:
 			"tracebackLogging": True
 		}
 		self.data = {} #this is the loaded and mostly filtered data
-		for x in DataTypes.allTypes:
-			xinstance = x(self)
-			self.dataTypes[xinstance.name] = xinstance
-		
-
-
+		DefaultTypes.LoadDefaultDatatypes(self)
+	def addDataType(self, dataType):
+		dataTypeInstance = dataType(self)
+		self.dataTypes[dataTypeInstance.name] = dataTypeInstance
 	def load(self, jsonFile, ruleFile):
 		data = None
 		rules = None

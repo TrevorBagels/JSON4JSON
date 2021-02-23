@@ -12,7 +12,7 @@ class JSON4JSON:
 			"unit": {"time": "s", "distance": "m"},
 			"autoAdd": True,
 			"t": "string",
-			"logging": 4, #logs warnings (4) and errors (5)
+			"logging": 4, #logs warnings (4) and errors (5). everything EQUAL TO OR GREATER THAN the logging level is what gets logged.
 			"tracebackLogging": True
 		}
 		DefaultTypes.LoadDefaultDatatypes(self) #user created datatypes can be added via the method in this method as well

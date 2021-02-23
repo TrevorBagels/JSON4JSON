@@ -36,5 +36,13 @@
 			}			
 		}
 	},
-	"//autoadd": "default is true. if set to false, the property will not be added if the user forgot or chose not to add it. useful for optional parameters."
+	"//autoadd": "default is true. if set to false, the property will not be added if the user forgot or chose not to add it. useful for optional parameters.",
+	"icloud": {"t": "object", "r": false, "autoAdd": false, "rules": 
+		{
+			"importContacts": {"t": "bool", "autoAdd": true, "d": false},
+			"username": {"t": "string", "r": true,  "d": "$prompt Please enter your icloud username: "},
+			"password": {"t": "string", "r": true,  "d": "$prompt Please enter your icloud password: "},
+			"//$prompt": "if the value is not provided in the config file, JSON4JSON will prompt the user if the default value is prefixed with '$prompt '"
+		}
+	}
 }

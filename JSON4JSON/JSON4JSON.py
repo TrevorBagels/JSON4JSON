@@ -1,11 +1,13 @@
 import json, os, sys, traceback
 from .utils import seperate_string_number
 from .DataTypes import DefaultTypes
-
+from .VarTypes import DefaultVarTypes
 class JSON4JSON:
 	def __init__(self):
 		self.dataTypes = {}
-		self.vars = {}
+		self.varTypes  = {}
+		self.vars      = {}
+		self.data      = {} #this is the loaded and mostly filtered data
 		self.defaults = {
 			"unit": {"time": "s", "distance": "m"},
 			"autoAdd": True,
@@ -13,27 +15,40 @@ class JSON4JSON:
 			"logging": 4, #logs warnings (4) and errors (5)
 			"tracebackLogging": True
 		}
-		self.data = {} #this is the loaded and mostly filtered data
-		DefaultTypes.LoadDefaultDatatypes(self)
-	def addDataType(self, dataType):
+		DefaultTypes.LoadDefaultDatatypes(self) #user created datatypes can be added via the method in this method as well
+		DefaultVarTypes.LoadDefaultVarTypes(self)
+		#something like 
+		#configParser = JSON4JSON()
+		#configParser.add_data_type(myCustomDataType)
+		  
+
+	def add_data_type(self, dataType):#renamed from addDataType
 		dataTypeInstance = dataType(self)
 		self.dataTypes[dataTypeInstance.name] = dataTypeInstance
+	def add_var_type(self, varType):
+		varTypeInstance = varType(self)
+		self.varTypes[varTypeInstance.name] = varTypeInstance
+	
 	def load(self, jsonFile, ruleFile):
 		data = None
 		rules = None
-		with open(jsonFile, "r") as f:
-			data = json.loads(f.read())
+		try:
+			with open(jsonFile, "r") as f:
+				data = json.loads(f.read())
+		except:
+			self.log(f"Could not read JSON file {jsonFile}", error=True)
+				
 		with open(ruleFile, "r") as f:
 			rules = json.loads(f.read())
 		self.convertAll(data, rules)
 	
+
+
 	def convertAll(self, data, rules): #data: dictionary (right after loading json), rules: dictionary from the raw json stuff...
 		#start by setting up
 		#hmmm maybe we should just use the conversion from datatypes.dicttype. unify everything, yknow
 		#yes
-		
 		self.data = self.convertSingle(data, {"t": "object", "rules": rules})
-	
 	def log(self, *args, **kw):
 		level = kw.get('level', 0)
 		error = kw.get('error', False)
@@ -61,7 +76,7 @@ class JSON4JSON:
 	def convertSingle(self, data, rule):
 		#data is the actual data, rule is the rule OBJECT for this. first, make sure the data type matches with the rule
 		expectedType = self.getProperty(rule, "t", noneFound="any")
-		data = self.testVar(data)
+		data = self.testVar(data, rule=rule) #does this start with $? if so, it's a variable. 
 		#allow comments on property values
 		if type(data) == str:
 			try:
@@ -85,13 +100,23 @@ class JSON4JSON:
 			rule['t'] = self.defaults['t'] #default is "string"
 		return self.dataTypes[rule['t']].default
 	
-	def testVar(self, value):#run pretty much every value through this function in case it's a ref to a variable
-		if type(value) == str and value.startswith("$$"):#it's a variable, does it exist?
-			variable = value.split("$$")[1]
-			if variable in self.vars:
-				return self.vars[variable]
+	def testVar(self, value, rule={}):#run pretty much every value through this function in case it's a ref to a variable
+		if type(value) == str and value.startswith("$"):#it's a variable
+			if value.startswith("$$"):#it's a user defined variable
+				variable = value.split("$$")[1]
+				if variable in self.vars:
+					return self.vars[variable]
+				else:
+					self.log(f"ERROR: Variable \"{variable}\" does not exist!", level=5)
 			else:
-				self.log(f"ERROR: Variable \"{variable}\" does not exist!", level=5)
+				#ok so it's a special type of variable, possibly $prompt or $arg.
+				varTypeName = value.split("$")[1].split(" ")[0]
+				if varTypeName in self.varTypes:
+					varType = self.varTypes[varTypeName]
+					if varType == None:
+						self.log(f"No var type known as \"{varTypeName}\"", error=True)
+					else:
+						return varType.get_value(rule)
 		return value
 	
 	def getProperty(self, dictionary, key, noneFound=None): #one line way of retrieving a value from a dictionary using a key.
@@ -99,8 +124,10 @@ class JSON4JSON:
 			return noneFound
 		else:
 			return dictionary[key]
+	
 	#region parsing
-	def parse_time(self, txt):
+	'''
+	def parse_time(self, txt):#im gonna get rid of this because nothing uses it
 		txt = txt.replace(" ", "")
 		value = seperate_string_number(txt)
 		return float(value[0]) * self.units["seconds"][value[1]]
@@ -108,8 +135,8 @@ class JSON4JSON:
 		txt = txt.replace(" ", "")
 		value = seperate_string_number(txt)
 		return float(value[0]) * self.units["meters"][value[1]]
-	
-	def merge_dicts(self, d1, d2): #puts d2 into d1
+	'''
+	def merge_dicts(self, d1, d2): #puts d2 into d1. i love recursive functions.
 		for x in d2:
 			if type(d2[x]) != dict:
 				d1[x] = d2[x]

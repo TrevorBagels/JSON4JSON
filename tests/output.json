@@ -44,6 +44,11 @@
             "radius": 100.0
         }
     ],
+    "icloud": {
+        "importContacts": false,
+        "username": "bob",
+        "password": "password123"
+    },
     "logging": "none",
     "testProperty": 60.0,
     "typeFilters": [

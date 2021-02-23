@@ -1,0 +1,13 @@
+name: update package
+on: [release]
+jobs:
+  updatepkg:
+    runs-on: ubuntu-latest
+    steps:
+      - name: pypi-publish
+        uses: pypa/gh-action-pypi-publish@v1.4.2
+        with:
+          # PyPI user
+          user: __token__
+          # Password for your PyPI user or an access token
+          password: ${{ secrets.PYPI_API_TOKEN }}

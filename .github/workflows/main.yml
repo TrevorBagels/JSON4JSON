@@ -1,16 +1,14 @@
 name: update package
 on: [release]
 jobs:
-	updatepkg:
-		runs-on: ubuntu-latest
-		steps:
-		- name: pypi-publish
-			# You may pin to the exact commit or the version.
-			# uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
-			uses: pypa/gh-action-pypi-publish@v1.4.2
-			with:
-				# PyPI user
-				user: # optional, default is __token__
-				# Password for your PyPI user or an access token
-				password: ${{ secrets.PYPI_API_TOKEN }}
+  updatepkg:
+    runs-on: ubuntu-latest
+    steps:
+      - name: pypi-publish
+        uses: pypa/gh-action-pypi-publish@v1.4.2
+        with:
+          # PyPI user
+          user: __token__
+          # Password for your PyPI user or an access token
+          password: ${{ secrets.PYPI_API_TOKEN }}
 			

@@ -1,0 +1,24 @@
+{
+    "someProperty": "this is a string, ",
+    "_defaults": {
+        "unit": {
+            "time": "s",
+            "distance": "m"
+        },
+        "autoAdd": true,
+        "t": "number"
+    },
+    "_variables": {},
+    "someObject": {
+        "_defaults": {
+            "unit": {
+                "time": "s",
+                "distance": "m"
+            },
+            "autoAdd": true,
+            "t": "number"
+        },
+        "_variables": {},
+        "aValue": 0.0
+    }
+}

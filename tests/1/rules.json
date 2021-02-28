@@ -1,6 +1,6 @@
 {
 	"@unit": {"time": "s"},
-	"@logging": 0,
+	"@@logging": 0,
 	"//@unit": "used to tell the config what units to use as the defaults. This property isn't required, but can be used to override default settings.",
 	"//info": "t: data type. d: default value. r: requried (default false).",
 	"someNumber": {"t": "number", "int": true, "min": 300, "max": 850},

@@ -1,4 +1,4 @@
-import json, os, sys, traceback
+import json, os, sys, traceback, copy
 from .utils import seperate_string_number
 from .DataTypes import DefaultTypes
 from .VarTypes import DefaultVarTypes
@@ -8,12 +8,13 @@ class JSON4JSON:
 		self.varTypes  = {}
 		self.vars      = {}
 		self.data      = {} #this is the loaded and mostly filtered data
+		#globals are properties for how JSON4JSON functions. Mostly for logging and stuff.
+		self.globals = {"logging": 4, "tracebackLogging": True}
+		#defaults are the default properties of objects. 
 		self.defaults = {
 			"unit": {"time": "s", "distance": "m"},
 			"autoAdd": True,
-			"t": "string",
-			"logging": 4, #logs warnings (4) and errors (5). everything EQUAL TO OR GREATER THAN the logging level is what gets logged.
-			"tracebackLogging": True
+			"t": "string"
 		}
 		DefaultTypes.LoadDefaultDatatypes(self) #user created datatypes can be added via the method in this method as well
 		DefaultVarTypes.LoadDefaultVarTypes(self)
@@ -48,7 +49,7 @@ class JSON4JSON:
 		#start by setting up
 		#hmmm maybe we should just use the conversion from datatypes.dicttype. unify everything, yknow
 		#yes
-		self.data = self.convertSingle(data, {"t": "object", "rules": rules})
+		self.data = self.convertSingle(data, {"t": "object", "rules": rules}, isRoot=True, parent={"_defaults": self.defaults, "_variables": {}})
 	def log(self, *args, **kw):
 		level = kw.get('level', 0)
 		error = kw.get('error', False)
@@ -57,10 +58,8 @@ class JSON4JSON:
 			level = 5
 		if warning:
 			level = 4
-		
-		if self.defaults['logging'] > level:
+		if self.globals['logging'] > level:
 			return
-		
 		out = kw.get('file',sys.stdout)
 		linesep= kw.get('end','\n')
 		colsep= kw.get('sep',' ')
@@ -73,10 +72,10 @@ class JSON4JSON:
 		out.write(tbtxt + colsep.join(map(str,args)))
 		out.write(linesep)
 	
-	def convertSingle(self, data, rule):
+	def convertSingle(self, data, rule, isRoot=False, parent=None):
 		#data is the actual data, rule is the rule OBJECT for this. first, make sure the data type matches with the rule
 		expectedType = self.getProperty(rule, "t", noneFound="any")
-		data = self.testVar(data, rule=rule) #does this start with $? if so, it's a variable. 
+		data = self.testVar(data, rule=rule) #does this start with $? if so, it's a variable.  TODO make sure this uses the parent
 		#allow comments on property values
 		if type(data) == str:
 			try:
@@ -87,18 +86,22 @@ class JSON4JSON:
 		if expectedType in self.dataTypes:
 			isValid = self.dataTypes[expectedType].matches(data)
 			if isValid:
-				data = self.dataTypes[expectedType].convert(data, rule)
+				#wait. is this a dict? if so, we need to pass the parent dictionary's defaults and variables
+				if type(data) == dict:
+					data = self.dataTypes[expectedType].convert(data, rule, parent=parent)
+				else:
+					data = self.dataTypes[expectedType].convert(data, rule)
 		else:
 			self.log("Warning: invallid type \"" + expectedType + "\"")
 
 		return data
 	
-	def getDefault(self, rule):
+	def getDefault(self, rule, objectData):
 		if "d" in rule:
 			return rule["d"]
 		if "t" not in rule:
-			rule['t'] = self.defaults['t'] #default is "string"
-		return self.dataTypes[rule['t']].default
+			rule['t'] = objectData['_defaults']['t'] #default is "string"
+		return self.dataTypes[rule['t']].default #last resort, pretty common, just use the default value associated with this type.
 	
 	def testVar(self, value, rule={}):#run pretty much every value through this function in case it's a ref to a variable
 		if type(value) == str and value.startswith("$"):#it's a variable
@@ -136,12 +139,14 @@ class JSON4JSON:
 		value = seperate_string_number(txt)
 		return float(value[0]) * self.units["meters"][value[1]]
 	'''
-	def merge_dicts(self, d1, d2): #puts d2 into d1. i love recursive functions.
+	def merge_dicts(self, d1, d2): #puts d2 into d1. i love recursive functions. note, arrays get overwritten and deep copied, they don't merge
 		for x in d2:
-			if type(d2[x]) != dict:
+			if type(d2[x]) not in [dict, list]:
 				d1[x] = d2[x]
-			else:
+			elif type(d2[x]) == dict:
 				self.merge_dicts(d1[x], d2[x])
+			elif type(d2[x]) == list:
+				d1[x] = copy.deepcopy(d2[x])
 		return True
 			
 	def set_value(self, dictionary, key, newValue):#dictionary = the dict to use, key = the key of the property, newValue = the new value

@@ -1,0 +1,10 @@
+{
+	"@t" : "number",
+	"//testing property inheritance, string rules, opposite vars, and argparse":"",
+	"//note to self: Reserved properties: _defaults, _variables":"",
+	"someProperty": {"t": "string", "transform": "upper"},
+	"someObject": {"t": "object", "rules": {
+			"aValue": {"r": true}
+		}
+	}
+}

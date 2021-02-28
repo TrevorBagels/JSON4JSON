@@ -1,0 +1,43 @@
+{
+    "@t": "number",
+    "//testing property inheritance, string rules, opposite vars, and argparse": "",
+    "//note to self: Reserved properties: _defaults, _variables": "",
+    "someProperty": {
+        "t": "string",
+        "transform": "upper"
+    },
+    "someObject": {
+        "t": "object",
+        "rules": {
+            "aValue": {
+                "r": false,
+                "t": "number"
+            },
+            "//this will become a number since the @t is BELOW this property statement.": "",
+            "@t": "bool",
+            "aBool": {
+                "r": false,
+                "t": "bool"
+            },
+            "//this should become a bool": ""
+        }
+    },
+    "anotherNumber": {
+        "r": false,
+        "t": "number"
+    },
+    "//should be a number again": "",
+    "someObject2": {
+        "t": "object",
+        "rules": {
+            "thing": {
+                "t": "number"
+            },
+            "@t": "array",
+            "thing2": {
+                "t": "array"
+            }
+        },
+        "//d": {}
+    }
+}

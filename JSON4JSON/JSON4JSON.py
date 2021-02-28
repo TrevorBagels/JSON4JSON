@@ -32,7 +32,7 @@ class JSON4JSON:
 	
 	def load(self, jsonFile, ruleFile):
 		data = None
-		rules = None
+		self.rules = None
 		try:
 			with open(jsonFile, "r") as f:
 				data = json.loads(f.read())
@@ -40,16 +40,15 @@ class JSON4JSON:
 			self.log(f"Could not read JSON file {jsonFile}", error=True)
 				
 		with open(ruleFile, "r") as f:
-			rules = json.loads(f.read())
-		self.convertAll(data, rules)
+			self.rules = json.loads(f.read())
+		self.convertAll(data, self.rules)
 	
 
 
 	def convertAll(self, data, rules): #data: dictionary (right after loading json), rules: dictionary from the raw json stuff...
-		#start by setting up
-		#hmmm maybe we should just use the conversion from datatypes.dicttype. unify everything, yknow
-		#yes
+		#this basically wraps everything into one object and then starts recursively converting it
 		self.data = self.convertSingle(data, {"t": "object", "rules": rules}, isRoot=True, parent={"_defaults": self.defaults, "_variables": {}})
+	
 	def log(self, *args, **kw):
 		level = kw.get('level', 0)
 		error = kw.get('error', False)
@@ -66,7 +65,7 @@ class JSON4JSON:
 
 		tb = traceback.format_stack()
 		tbtxt = "\n" + tb[len(tb)-2].split("\n")[0] + "\n"
-		if self.defaults['tracebackLogging'] == False:
+		if self.globals['tracebackLogging'] == False:
 			tbtxt = ""
 		
 		out.write(tbtxt + colsep.join(map(str,args)))
@@ -82,9 +81,10 @@ class JSON4JSON:
 				data = data.split("//")[0]
 			except:
 				pass
+		
 		#istype?
 		if expectedType in self.dataTypes:
-			isValid = self.dataTypes[expectedType].matches(data)
+			isValid = self.dataTypes[expectedType].matches(data) #makes sure that this is the right data type
 			if isValid:
 				#wait. is this a dict? if so, we need to pass the parent dictionary's defaults and variables
 				if type(data) == dict:
@@ -101,7 +101,7 @@ class JSON4JSON:
 			return rule["d"]
 		if "t" not in rule:
 			rule['t'] = objectData['_defaults']['t'] #default is "string"
-		return self.dataTypes[rule['t']].default #last resort, pretty common, just use the default value associated with this type.
+		return copy.deepcopy(self.dataTypes[rule['t']].default) #last resort, pretty common, just use the default value associated with this type.
 	
 	def testVar(self, value, rule={}):#run pretty much every value through this function in case it's a ref to a variable
 		if type(value) == str and value.startswith("$"):#it's a variable
@@ -128,17 +128,6 @@ class JSON4JSON:
 		else:
 			return dictionary[key]
 	
-	#region parsing
-	'''
-	def parse_time(self, txt):#im gonna get rid of this because nothing uses it
-		txt = txt.replace(" ", "")
-		value = seperate_string_number(txt)
-		return float(value[0]) * self.units["seconds"][value[1]]
-	def parse_measurement(self, txt): #returns meters
-		txt = txt.replace(" ", "")
-		value = seperate_string_number(txt)
-		return float(value[0]) * self.units["meters"][value[1]]
-	'''
 	def merge_dicts(self, d1, d2): #puts d2 into d1. i love recursive functions. note, arrays get overwritten and deep copied, they don't merge
 		for x in d2:
 			if type(d2[x]) not in [dict, list]:
@@ -152,5 +141,4 @@ class JSON4JSON:
 	def set_value(self, dictionary, key, newValue):#dictionary = the dict to use, key = the key of the property, newValue = the new value
 		self.merge_dicts(dictionary, {key: self.testVar(newValue)})
 		return True
-	#endregion
 

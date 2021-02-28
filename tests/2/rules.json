@@ -4,7 +4,17 @@
 	"//note to self: Reserved properties: _defaults, _variables":"",
 	"someProperty": {"t": "string", "transform": "upper"},
 	"someObject": {"t": "object", "rules": {
-			"aValue": {"r": true}
+			"aValue": {"r": false}, "//this will become a number since the @t is BELOW this property statement.":"",
+			"@t" : "bool",
+			"aBool" : {"r": false}, "//this should become a bool" : ""
 		}
+	},
+	"anotherNumber" : {"r": false}, "//should be a number again":"",
+	"someObject2" : {"t": "object", "rules" : {
+		"thing" : {},
+		"@t" : "array",
+		"thing2" : {}
+		}, 
+		"//d": {}
 	}
 }

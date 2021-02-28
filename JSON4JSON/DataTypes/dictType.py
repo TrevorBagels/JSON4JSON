@@ -1,6 +1,6 @@
 
 from copy import deepcopy
-
+import random
 
 class dictType:
 	def __init__(self, ajson):
@@ -12,18 +12,18 @@ class dictType:
 		if type(data) == dict:
 			return True
 		return False
-	def convert(self, data, rules, parent={}):#this ones different, since it's a dictionary, therefore it has multiple values of different types (including other dictionaries/objects)
+	def convert(self, data, rules, parent={}, root=False):#this ones different, since it's a dictionary, therefore it has multiple values of different types (including other dictionaries/objects)
 		data['_defaults'] = {} #reserved property defaults
 		data['_variables'] = {} #reserved property variables
 		#set defaults to parent's defaults, then override some of them.
-		print(parent)
 		data['_defaults'] = deepcopy(parent['_defaults'])
-		oldRules = rules
-		rules = oldRules['rules']
+		
+		oldRules = rules #rules set for the object
+		rules = oldRules['rules'] #these rules are basically the properties of the object
 		for key in rules:
 			if key.startswith("//"): #ignore, this is a comment
 				continue
-			#region rule file only
+			#region rule file only			
 			if key.startswith("@@"): #this sets the settings of JSON4JSON
 				self.ajson.set_value(self.ajson.globals, key.split("@@")[1], rules[key])
 				continue
@@ -31,9 +31,12 @@ class dictType:
 				self.ajson.set_value(data['_defaults'], key.split("@")[1], rules[key])
 				continue
 			#endregion
-			if key not in data and self.ajson.getProperty(rules[key], "autoAdd", noneFound=self.ajson.defaults['autoAdd']):
-				self.ajson.log(f"Key \"{key}\" not in data file. Setting to default.", level=-2)
+
+			#if this property wasn't supplied, and autoAdd is enabled
+			if key not in data and self.ajson.getProperty(rules[key], "autoAdd", noneFound=data["_defaults"]['autoAdd']):
+				#add the property
 				data[key] = self.ajson.getDefault(rules[key], data)
+			
 			#check if this makes a variable. if so, set the variable to the value.
 			if "varSet" in rules[key]:
 				self.ajson.log(f"Setting variable {rules[key]['varSet']}", level=-1)

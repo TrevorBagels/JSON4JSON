@@ -4,7 +4,8 @@
     "//note to self: Reserved properties: _defaults, _variables": "",
     "someProperty": {
         "t": "string",
-        "transform": "upper"
+        "transform": "upper",
+        "varSet": "rootVarHere"
     },
     "someObject": {
         "t": "object",
@@ -17,10 +18,15 @@
             "@t": "bool",
             "aBool": {
                 "r": false,
+                "varSet": ".rootVarSetFromSomeObject",
                 "t": "bool"
             },
             "//this should become a bool": ""
         }
+    },
+    "youBetterAddThis": {
+        "r": true,
+        "t": "number"
     },
     "anotherNumber": {
         "r": false,
@@ -36,8 +42,33 @@
             "@t": "array",
             "thing2": {
                 "t": "array"
+            },
+            "thing3": {
+                "t": "string",
+                "d": "thing no. 3",
+                "varSet": "aLocalVariable"
+            },
+            "nestedObject": {
+                "t": "object",
+                "rules": {
+                    "prop1": {
+                        "t": "array"
+                    },
+                    "anotherObject": {
+                        "t": "object",
+                        "rules": {
+                            "prop1": {
+                                "t": "string"
+                            }
+                        }
+                    },
+                    "@...t": "string",
+                    "aReferenceToRoot": {
+                        "t": "string",
+                        "d": "$$rootVarSetFromSomeObject"
+                    }
+                }
             }
-        },
-        "//d": {}
+        }
     }
 }

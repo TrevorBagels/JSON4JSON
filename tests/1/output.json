@@ -13,11 +13,33 @@
     "agencies": [
         {
             "name": "Tualatin Valley Fire & Rescue (OR)",
+            "_uid": "9",
+            "_parent": "ROOT",
+            "_defaults": {
+                "unit": {
+                    "time": "s",
+                    "distance": "m"
+                },
+                "autoAdd": true,
+                "t": "string"
+            },
+            "_variables": {},
             "scanInterval": 60.0
         },
         {
             "name": "Portland Fire & Rescue (OR)",
-            "scanInterval": 300.0
+            "scanInterval": 300.0,
+            "_uid": "12",
+            "_parent": "ROOT",
+            "_defaults": {
+                "unit": {
+                    "time": "s",
+                    "distance": "m"
+                },
+                "autoAdd": true,
+                "t": "string"
+            },
+            "_variables": {}
         }
     ],
     "locations": [
@@ -33,6 +55,17 @@
                 " normally this would throw an error since lat. is supposed to be between -90 and 90, but index specific rules are set up for the coords property, and they have min/max rules as well."
             ],
             "radius": 2000.0,
+            "_uid": "17",
+            "_parent": "ROOT",
+            "_defaults": {
+                "unit": {
+                    "time": "s",
+                    "distance": "m"
+                },
+                "autoAdd": true,
+                "t": "string"
+            },
+            "_variables": {},
             "address": "",
             "importance": 1
         },
@@ -40,15 +73,48 @@
             "name": "test 2",
             "match": "VANCOUVER AVE",
             "importance": 3,
+            "_uid": "25",
+            "_parent": "ROOT",
+            "_defaults": {
+                "unit": {
+                    "time": "s",
+                    "distance": "m"
+                },
+                "autoAdd": true,
+                "t": "string"
+            },
+            "_variables": {},
             "address": "",
             "radius": 100.0
         }
     ],
     "icloud": {
+        "_uid": "30",
+        "_parent": "ROOT",
+        "_defaults": {
+            "unit": {
+                "time": "s",
+                "distance": "m"
+            },
+            "autoAdd": true,
+            "t": "string"
+        },
+        "_variables": {},
         "importContacts": false,
-        "username": "bob",
-        "password": "password123"
+        "username": "none",
+        "password": "none"
     },
+    "_uid": "ROOT",
+    "_parent": "ROOT",
+    "_defaults": {
+        "unit": {
+            "time": "s",
+            "distance": "m"
+        },
+        "autoAdd": true,
+        "t": "string"
+    },
+    "_variables": {},
     "logging": "none",
     "testProperty": 60.0,
     "typeFilters": [

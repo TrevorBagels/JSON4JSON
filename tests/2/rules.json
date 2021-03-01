@@ -2,19 +2,27 @@
 	"@t" : "number",
 	"//testing property inheritance, string rules, opposite vars, and argparse":"",
 	"//note to self: Reserved properties: _defaults, _variables":"",
-	"someProperty": {"t": "string", "transform": "upper"},
+	"someProperty": {"t": "string", "transform": "upper", "varSet": "rootVarHere"},
 	"someObject": {"t": "object", "rules": {
 			"aValue": {"r": false}, "//this will become a number since the @t is BELOW this property statement.":"",
 			"@t" : "bool",
-			"aBool" : {"r": false}, "//this should become a bool" : ""
+			"aBool" : {"r": false, "varSet": ".rootVarSetFromSomeObject"}, "//this should become a bool" : ""
 		}
 	},
+	"youBetterAddThis" : {"r": true},
 	"anotherNumber" : {"r": false}, "//should be a number again":"",
 	"someObject2" : {"t": "object", "rules" : {
 		"thing" : {},
 		"@t" : "array",
-		"thing2" : {}
-		}, 
-		"//d": {}
+		"thing2" : {},
+		"thing3" : {"t": "string", "d": "thing no. 3", "varSet" : "aLocalVariable"},
+		"nestedObject" : {"t": "object", "rules":{
+				"prop1" : {},
+				"anotherObject" : {"t": "object", "rules": {"prop1": {"t": "string"}}},
+				"@...t": "string",
+				"aReferenceToRoot" : {"t": "string", "d" : "$$rootVarSetFromSomeObject"}
+			}
+		}
+		}
 	}
 }

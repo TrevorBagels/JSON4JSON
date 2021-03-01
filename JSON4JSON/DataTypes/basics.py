@@ -75,7 +75,7 @@ class arrayType:
 		if type(data) == list:
 			return True
 		return False
-	def convert(self, data, rules):
+	def convert(self, data, rules, parent):
 		#length
 		minLength = self.ajson.getProperty(rules, "minLength", noneFound=0)
 		maxLength = self.ajson.getProperty(rules, "maxLength", noneFound=math.inf)
@@ -83,11 +83,12 @@ class arrayType:
 			self.ajson.log("Array too short!", error=True)
 		if len(data) > maxLength:
 			data = data[:maxLength]
+		
 		for x,i in zip(data, range(0, len(data))):
 			#convert single
 			usedRule = rules['rule']
 			#check if we have any custom defined rules
 			if f"rule#{i}" in rules:
 				usedRule = rules[f'rule#{i}']
-			data[i] = self.ajson.convertSingle(x, usedRule)
+			data[i] = self.ajson.convertSingle(x, usedRule, parent=parent)
 		return data

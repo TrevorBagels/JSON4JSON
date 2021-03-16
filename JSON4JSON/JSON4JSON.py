@@ -1,18 +1,46 @@
-import json, os, sys, traceback, copy
-from .utils import seperate_string_number
-from .DataTypes import DefaultTypes
-from .VarTypes import DefaultVarTypes
+import json, os, sys, traceback, copy, argparse
+from math import exp
+import colorama
+
+from colorama.ansi import Fore
+
+class DBG:
+	def __init__(self, devmode):
+		if devmode == False: return
+		from colorama import init as colorInit
+		from colorama import Fore
+		self.colors = {"red": Fore.RED, "green": Fore.GREEN, "blue": Fore.BLUE, "yellow": Fore.YELLOW, "orange": Fore.LIGHTRED_EX, "purple": Fore.MAGENTA}
+		colorInit() #for testing
+	def print(self, *args, color="green"):
+		c = Fore.CYAN
+		if color in self.colors: c = self.colors[color]
+		print(c + "", *args)
+		print(colorama.Style.RESET_ALL)
+
 
 class JSON4JSON:
 	def __init__(self):
+		from .utils import seperate_string_number
+		from .DataTypes import DefaultTypes
+		from .VarTypes import DefaultVarTypes
+		self.debugger = DBG(True)
+		self.print = self.debugger.print
+
+		self.init_self_variables()
 		self.dataTypes = {}
 		self.varTypes  = {}
+		DefaultTypes.LoadDefaultDatatypes(self) #user created datatypes can be added via the method in this method as well
+		DefaultVarTypes.LoadDefaultVarTypes(self)
+		#something like 
+		#configParser = JSON4JSON()
+		#configParser.add_data_type(myCustomDataType)
+	
+	def init_self_variables(self):
 		self.vars      = {}
 		self.data      = {} #this is the loaded and mostly filtered data
-
 		self.objects   = {"ROOT": self.data} #this keeps track of object hierarchy
 		self.uidLevel = 0 #for keeping track object hierarchy
-		#globals are properties for how JSON4JSON functions. Mostly for logging and stuff.
+		#globals are properties for how JSON4JSON functions. Mostly for logging and stuff. Accessed via "@@property"
 		self.globals = {"logging": 4, "tracebackLogging": True}
 		#defaults are the default properties of objects. 
 		self.defaults = {
@@ -21,19 +49,19 @@ class JSON4JSON:
 			"t": "string",
 			"r" : False
 		}
-		DefaultTypes.LoadDefaultDatatypes(self) #user created datatypes can be added via the method in this method as well
-		DefaultVarTypes.LoadDefaultVarTypes(self)
-		#something like 
-		#configParser = JSON4JSON()
-		#configParser.add_data_type(myCustomDataType)
+		self.data["_defaults"] = self.defaults
+		self.data["_uid"] = "ROOT"
+		self.data["_variables"] = self.vars
+		self.data['_parent'] = "ROOT"
 
-		
 	def add_data_type(self, dataType):#renamed from addDataType
 		dataTypeInstance = dataType(self)
 		self.dataTypes[dataTypeInstance.name] = dataTypeInstance
+	
 	def add_var_type(self, varType):
 		varTypeInstance = varType(self)
 		self.varTypes[varTypeInstance.name] = varTypeInstance
+	
 	def load(self, jsonFile, ruleFile):
 		data = None
 		self.rules = None
@@ -44,99 +72,166 @@ class JSON4JSON:
 			self.log(f"Could not read JSON file \"{jsonFile}\"", error=True)	
 		with open(ruleFile, "r") as f:
 			self.rules = json.loads(f.read())
-		self.convertAll(data, self.rules)
+		self.convert_all(data, self.rules)
 	
-	def convertAll(self, data, rules): #data: dictionary (right after loading json), rules: dictionary from the raw json stuff...
+	def convert_all(self, data, rules): #data: dictionary (right after loading json), rules: dictionary from the raw json stuff...
 		#this basically wraps everything into one object and then starts recursively converting it
-		self.data = self.convertSingle(data, {"t": "object", "rules": rules}, parent={"_parent": "ROOT", "_uid": "ROOT", "_defaults": self.defaults, "_variables": {}}, setUID="ROOT")
+		self.init_self_variables()
+		self.data = self.convert_single(data, {"t": "object", "rules": rules}, parentUID="ROOT")
 	
-	def convertSingle(self, data, rule, parent=None, setUID=None):
-		uid = setUID
-		if uid == None:
-			uid = self.getUid()
-		#data is the actual data, rule is the rule OBJECT for this. first, make sure the data type matches with the rule
-		expectedType = self.getProperty(rule, "t", noneFound="any")
-		data = self.testVar(data, parent, rule=rule) #does this start with $? if so, it's a variable.  TODO make sure this uses the parent
+	def convert_single(self, property, ruleset, setUID=None, parentUID="ROOT"):
+		#property = property value (not name) (from config)
 		#allow comments on property values
-		if type(data) == str:
+		if type(property) == str:
 			try:
-				data = data.split("//")[0]
+				property = property.split("//")[0]
 			except:
 				pass
-		#istype?
+		#Generate UID
+		uid = setUID
+		if uid == None:
+			uid = self.generate_uid()
+		
+		#data = self.test_variable(data, parent, rule=rule) #does this start with $? if so, it's a variable.
+		
+		expectedType = self.get_property(ruleset, "t", parentUID, noneFound="any")
+		
 		if expectedType in self.dataTypes:
-			isValid = self.dataTypes[expectedType].matches(data) #makes sure that this is the right data type
+			isValid = self.dataTypes[expectedType].matches(property) #whether or not this matches the expected datatype
 			if isValid:
 				#wait. is this a dict? if so, we need to pass the parent dictionary's defaults and variables
-				if type(data) == dict:
-					data["_uid"] = uid
-					data["_parent"] = parent['_uid']
-					self.objects[uid] = data
-					data = self.dataTypes[expectedType].convert(data, rule, parent=parent)
-				elif type(data) == list:
-					data = self.dataTypes[expectedType].convert(data, rule, parent=parent)
+				if type(property) == dict:
+					property["_uid"] = uid
+					property["_parent"] = parentUID
+					self.objects[uid] = property
+					property = self.dataTypes[expectedType].convert(property, ruleset, parentUID=parentUID)
+				elif type(property) == list:
+					property = self.dataTypes[expectedType].convert(property, ruleset, parentUID=parentUID)
 				else:
-					data = self.dataTypes[expectedType].convert(data, rule)
+					property = self.dataTypes[expectedType].convert(property, ruleset)
 		else:
-			self.log("Warning: invallid type \"" + expectedType + "\"")
-		return data
+			raise Exception(f"Invallid DataType \"{expectedType}\"")
+		return property
 	
 	#returns the parent object
-	def getParent(self, data, level=1):
-		uid = data['_uid']
-		parent = data['_uid']
-		for x in range(0, level):
-			parent = self.objects[parent]["_parent"]
-		return self.objects[parent]
-	def getUid(self):
+
+	def get_parent(self, propertyUID, level=1):
+		"""Gets the parent of an object
+
+		Args:
+			propertyUID (string, dictionary): Either the UID of the property, or the property itself.
+			level (int, optional): How many levels to go up. Defaults to 1.
+
+		Returns:
+			[string]: UID of the parent. 
+		"""
+		"""
+		Parent structure from the perspective of "ParentC"
+		ROOT - level = 3 (all the way to infinity!)
+		ROOT - level = 2
+			ParentB - level = 1
+				ParentC - level = 0
+		"""
+		#get the UID of the data object.
+		uid = propertyUID
+		if type(propertyUID) == dict: uid = propertyUID['_uid']
+		
+		parent = self.get_object(uid)['_uid'] #first parent at level 0 (which is itself.)
+		for x in range(0, level): #iterate until we get the target parent
+			parent = self.get_object(parent)["_parent"]
+		
+		return self.get_object(parent)
+	
+	def get_object(self, UID):
+		"""Gets an object from a specified UID
+
+		Args:
+			UID (string): The UID of the target object.
+		Raises:
+			Exception - The object wasn't found
+		Returns:
+			[dictionary]: The object we're looking for.
+		"""
+		if UID not in self.objects:
+			raise Exception("Object not found")
+		return self.objects[UID]
+
+	def generate_uid(self):
+		"""Generates a unique identifier as a string.
+
+		Returns:
+			[string]: The newly generated UID
+		"""
 		self.uidLevel += 1
 		return str(self.uidLevel)
-	def getDefault(self, rule, objectData):
-		if "d" in rule:
-			return rule["d"]
-		if "t" not in rule:
-			rule['t'] = objectData['_defaults']['t'] #default is "string"
-		return copy.deepcopy(self.dataTypes[rule['t']].default) #last resort, pretty common, just use the default value associated with this type.
 	
-	def testVar(self, value, parent, rule={}, root=0):#run pretty much every value through this function in case it's a ref to a variable
-		if type(value) == str and value.startswith("$"):#it's a variable
-			if value.startswith("$$"):#it's a user defined variable
-				variable = value.split("$$")[1]
-				parentLevel = 0
-				for x in copy.copy(variable):
-					if x == ".":
-						parentLevel += 1
-						variable = variable[1:]
-					else:
-						break
-				targetParent = self.getParent(parent, level = parentLevel)
-				if variable in targetParent["_variables"]:
-					return targetParent["_variables"][variable]
+	def get_default(self, ruleset, property):
+		#enforce types
+		if "t" not in ruleset:
+			ruleset['t'] = self.get_property(property['_defaults'], 't', property['_parent']) #default is "string"
+		#return the default if it exists
+		if "d" in ruleset:
+			return self.get_property(ruleset, "d", property["_parent"])
+		#no default, return the default specified in the DataType.
+		return copy.deepcopy(self.dataTypes[ruleset['t']].default) #last resort, pretty common, just use the default value associated with this type.
+	
+	def test_variable(self, property, parentUID, ruleset, root=0):#run pretty much every value through this function in case it's a ref to a variable
+		if type(property) == str and property.startswith("$"):#it's a variable
+			if property.startswith("$$"):#it's a user defined variable
+				variable = property.split("$$")[1]
+				parentLevel = property.count(".")
+				variable = property.split("$$" + (property.count(".") * ".") )[1] #this works, don't question it.
+
+				target_parent = self.get_parent(parentUID, level = parentLevel)
+				if variable in target_parent["_variables"]:
+					return target_parent["_variables"][variable]
 				else:
 					#ok so we couldn't find this variable. Try again, but go up one parent.
-					if parent['_uid'] == "ROOT":
+					if parentUID == "ROOT":
 						root += 1
 					if root < 2:
-						return self.testVar(value[:2] + "." + value[2:], parent, rule=rule, root=root)
+						return self.test_variable(property[:2] + "." + property[2:], parentUID, ruleset, root=root)
 					self.log(f"Variable \"{variable}\" does not exist!", level=5)
 			else:
 				#ok so it's a special type of variable, possibly $prompt or $arg.
-				varTypeName = value.split("$")[1].split(" ")[0]
+				varTypeName = property.split("$")[1].split(" ")[0]
 				if varTypeName in self.varTypes:
 					varType = self.varTypes[varTypeName]
 					if varType == None:
 						self.log(f"No such varType \"{varTypeName}\"", error=True)
 					else:
-						return varType.get_value(rule)
-		return value
+						return varType.get_value(ruleset)
+		return property
 	
-	def getProperty(self, dictionary, key, noneFound=None): #one line way of retrieving a value from a dictionary using a key.
+	def get_property(self, dictionary: dict, key: str, parentUID: str, noneFound=None):
+		"""Gets a value from a dictionary with a given key. Also tests for variables.
+
+		Args:
+			dictionary (dict): The dictionary to retrieve from
+			key (str): The key to use
+			parentUID (str): The UID of the parent. This is used to test variables
+			noneFound (any, optional): The value to return if nothing is found. Defaults to None.
+
+		Returns:
+			[any]: The property you're looking for.
+		"""
 		if key not in dictionary:
 			return noneFound
 		else:
-			return dictionary[key]
+			return self.test_variable(dictionary[key], 
+			parentUID, 
+			dictionary)
 	
 	def merge_dicts(self, d1, d2): #puts d2 into d1. i love recursive functions. note, arrays get overwritten and deep copied, they don't merge
+		"""Puts D2 into D1.
+
+		Args:
+			d1 ([type]): [description]
+			d2 ([type]): [description]
+
+		Returns:
+			[type]: [description]
+		"""
 		for x in d2:
 			if type(d2[x]) not in [dict, list]:
 				d1[x] = d2[x]
@@ -146,9 +241,14 @@ class JSON4JSON:
 				d1[x] = copy.deepcopy(d2[x])
 		return True
 			
-	def set_value(self, dictionary, key, newValue, parent=None):#dictionary = the dict to use, key = the key of the property, newValue = the new value
-		self.merge_dicts(dictionary, {key: self.testVar(newValue, parent)})
-		return True
+	def set_value(self, dictionary:dict, key:str, newValue):#dictionary = the dict to use, key = the key of the property, newValue = the new value
+		"""Sets the value of a dictionary without overwriting everything if the new value is a dictionary.
+		Args:
+			dictionary (dict): [description]
+			key (str): [description]
+			newValue (any): [description]
+		"""
+		self.merge_dicts(dictionary, {key: newValue})
 	
 
 	def log(self, *args, **kw):

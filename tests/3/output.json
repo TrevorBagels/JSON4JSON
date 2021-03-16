@@ -1,0 +1,23 @@
+{
+    "someProperty": "this is a string, //and this is a comment",
+    "_uid": "1",
+    "_parent": "ROOT",
+    "_variables": {
+        "someSchema": {
+            "_uid": "4",
+            "_parent": "1",
+            "_variables": {},
+            "thing": 0.0,
+            "thing2": "aaaa"
+        }
+    },
+    "iwillprompt": 111.0,
+    "icanarg": null,
+    "someSchema": {
+        "_uid": "4",
+        "_parent": "1",
+        "_variables": {},
+        "thing": 0.0,
+        "thing2": "aaaa"
+    }
+}

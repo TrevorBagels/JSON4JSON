@@ -1,60 +1,79 @@
 from copy import deepcopy, copy
-
+from ..JSON4JSON import JSON4JSON
 class dictType:
-	def __init__(self, ajson):
+	def __init__(self, ajson : JSON4JSON):
 		self.name = "object"
-		self.ajson = ajson
+		self.j4j = ajson
+		self.t = dict
 		self.default = {}
 	#returns true/false, whether or not the data is this type
 	def matches(self, data):
 		if type(data) == dict:
 			return True
 		return False
-	def convert(self, data, rules, parent={}):#this ones different, since it's a dictionary, therefore it has multiple values of different types (including other dictionaries/objects)
+	def convert(self, data, ruleset, parentUID="ROOT"):#this ones different, since it's a dictionary, therefore it has multiple values of different types (including other dictionaries/objects)
+		parent = self.j4j.get_object(parentUID)
 		data['_defaults'] = {} #reserved property defaults
 		data['_variables'] = {} #reserved property variables
 		#set defaults to parent's defaults, then override some of them. 
 		data['_defaults'] = deepcopy(parent['_defaults'])
-		#data["_variables"] = deepcopy(parent["_variables"]) We could do this, or we could make it so that if a variable isn't found, check the next parent up.
-		oldRules = rules #rules set for the object
-		rules = oldRules['rules'] #these rules are basically the properties of the object
-		for property in rules:
-			if property.startswith("//"): #ignore, this is a comment
+		_ruleset = ruleset
+		rules = self.j4j.get_property(ruleset, 'rules', parentUID) #propertyName, propertyRules
+		ruleset = None
+		for propertyName, ruleset in rules.items(): #iterating through "propertyName": {"t": "string", "d": "no"} type of stuff
+			if propertyName.startswith("//"): #ignore, this is a comment
 				continue
+
 			#region rule file only	
-			if property.startswith("@@"): #this sets the settings of JSON4JSON
-				self.ajson.set_value(self.ajson.globals, property.split("@@")[1], rules[property])
+			if propertyName.startswith("@@"): 
+				#this sets the settings of JSON4JSON. 
+				# In this case, the ruleset is not actually a ruleset, but the new value for the setting
+				# Generally, this is for things like logging levels and whatnot.
+				self.j4j.set_value(self.j4j.globals, propertyName.split("@@")[1], ruleset)
 				continue
-			if property[0] == "@": #this overrides default settings
+			
+			if propertyName[0] == "@":
+				#this overrides default settings
+				#in this case, the ruleset is the new value of whatever is being overriden.
 				#get the parent that this refers to. as in, are there any periods after @?
-				targetParent = data
-				targetRule = property.split("@")[1]
-				if property[1] == ".":
-					targetParent = self.ajson.getParent(data, level=property.count("."))
-					targetRule = property.split("@" + (property.count(".") * ".") )[1]
-				self.ajson.set_value(targetParent['_defaults'], targetRule, rules[property], parent=data)
+				target_parent = data["_uid"]
+				targetRule = propertyName.split("@")[1]
+				if propertyName[1] == ".": #go up a level or two. or more.
+					target_parent = self.j4j.get_parent(target_parent, level=propertyName.count("."))["_uid"]
+					targetRule = propertyName.split("@" + (propertyName.count(".") * ".") )[1] #this works, don't question it.
+				self.j4j.set_value(self.j4j.get_object(target_parent)['_defaults'],
+					targetRule,
+					ruleset)
 				continue
+
 			#endregion
-			if property not in data:
-				if self.ajson.getProperty(rules[property], "r", noneFound=data["_defaults"]['r']): #required property. not found. throw an error.
-					self.ajson.log(f"Property with key \"{property}\" was not found in the config file. ", error=True)
+			if propertyName not in data: #a property was not found in the config, and this property is required.
+				if self.j4j.get_property(ruleset, "r", parentUID, noneFound=data["_defaults"]['r']):
+					raise Exception(f"Property with key \"{propertyName}\" was not found in the config file. ")
+			
 			#if this property wasn't supplied, and autoAdd is enabled
-			if property not in data and self.ajson.getProperty(rules[property], "autoAdd", noneFound=data["_defaults"]['autoAdd']):
-				#add the property
-				data[property] = self.ajson.getDefault(rules[property], data)
+			if propertyName not in data and self.j4j.get_property(ruleset, "autoAdd", parentUID, noneFound=data["_defaults"]['autoAdd']):
+				#add the property, assign it to it's default value
+				data[propertyName] = self.j4j.get_default(ruleset, data)
+			
+			
 			#check if this makes a variable. if so, set the variable to the value.
-			if "varSet" in rules[property]:
-				self.ajson.log(f"Setting variable {rules[property]['varSet']}", level=-1)
-				varToSet = rules[property]['varSet']
-				targetParentLevel = 0
+			if "varSet" in ruleset:
+				self.j4j.log(f"Setting variable {ruleset['varSet']}", level=-1)
+				varToSet = ruleset['varSet']
+				target_parent_level = 0
 				for x in copy(varToSet):
 					if x == ".":
-						targetParentLevel += 1
+						target_parent_level += 1
 						varToSet = varToSet[1:]
 					else:
 						break
-				targetObject = self.ajson.getParent(data, level=targetParentLevel)
-				targetObject['_variables'][varToSet] = data[property]
-			if property in data:
-				data[property] = self.ajson.convertSingle(data[property], rules[property], parent=data)
+				targetObject = self.j4j.get_parent(data, level=target_parent_level)
+				targetObject['_variables'][varToSet] = data[propertyName]
+			
+			if propertyName in data:
+				data[propertyName] = self.j4j.convert_single(
+					self.j4j.get_property(data, propertyName, parentUID),
+					ruleset,
+					parentUID=data["_uid"])
 		return data

@@ -1,8 +1,10 @@
-from .basics import number, seperate_string_number
-class unit:
-	def __init__(self, ajson, name, default, units={}):
+from .basics import number, seperate_string_number, DataType
+
+class unit(DataType):
+	def __init__(self, j4j, name, default, units={}):
+		super().__init__(j4j)
 		self.name = name
-		self.ajson = ajson
+		self.t = str
 		self.default = default
 		self.units = units
 	#returns true/false, whether or not the data is this type
@@ -11,10 +13,10 @@ class unit:
 			if seperate_string_number(data)[1] in self.units:
 				return True
 			else:
-				self.ajson.log(f"Error: {self.name} does not recognize \"{seperate_string_number(data)[1]}\" as a valid unit.", level=5)
+				self.j4j.log(f"Error: {self.name} does not recognize \"{seperate_string_number(data)[1]}\" as a valid unit.", level=5)
 		return False
 	def convert(self, data, rule, skipRuleConversion=False, useUnit="none"):#useUnit, if not set to none, skips looking through the rule file and uses whatever it's set to as the new unit.
-		unitToUse = self.ajson.defaults['unit'][self.name]
+		unitToUse = self.j4j.defaults['unit'][self.name]
 		#check if there's a rule for this, that would ovverride unitToUse
 		if skipRuleConversion == False:
 			if "unit" in rule:
@@ -31,7 +33,7 @@ class unit:
 		valueInDefaultUnits = self.units[value[1]] * float(value[0]) #converts whatever units were used to seconds/meters
 
 		valueInDesiredUnits = valueInDefaultUnits / self.units[unitToUse] #converts to the value we should be using
-		numberValue = self.ajson.dataTypes['number'].convert(valueInDesiredUnits, rule)
+		numberValue = self.j4j.dataTypes['number'].convert(valueInDesiredUnits, rule)
 		return numberValue
 
 

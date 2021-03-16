@@ -5,7 +5,7 @@ import objgraph
 
 config = JSON4JSON()
 
-path = "./tests/2/"
+path = "./tests/1/"
 
 config.load(f"{path}config.json", f"{path}rules.json")
 print("\n\n")
@@ -38,7 +38,7 @@ def getObjectPath(myKey, o, level=0):
 
 
 print(getObjectPath("root", config.data, level=0))
-print("parent", config.getParent(config.data['someObject2']['nestedObject']['anotherObject'], level = 0)['_uid'], config.data['someObject2']['nestedObject']['anotherObject']['_uid'])
+#print("parent", config.getParent(config.data['someObject2']['nestedObject']['anotherObject'], level = 0)['_uid'], config.data['someObject2']['nestedObject']['anotherObject']['_uid'])
 removeUnderscored(config.data, keep=["_uid", "_parent", "_variables"])
 objgraph.show_refs(config.data, max_depth=8)
 

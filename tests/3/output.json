@@ -1,21 +1,15 @@
 {
     "someProperty": "this is a string, //and this is a comment",
-    "_uid": "1",
+    "iAmANumber": 16.0,
+    "_uid": "ROOT",
     "_parent": "ROOT",
-    "_variables": {
-        "someSchema": {
-            "_uid": "4",
-            "_parent": "1",
-            "_variables": {},
-            "thing": 0.0,
-            "thing2": "aaaa"
-        }
-    },
-    "iwillprompt": 111.0,
-    "icanarg": null,
+    "_variables": {},
+    "iwillprompt": 10.0,
+    "icanarg": "here's a string",
+    "icanargasanumber": 22.0,
     "someSchema": {
-        "_uid": "4",
-        "_parent": "1",
+        "_uid": "5",
+        "_parent": "ROOT",
         "_variables": {},
         "thing": 0.0,
         "thing2": "aaaa"

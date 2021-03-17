@@ -20,7 +20,7 @@
 				"prop1" : {},
 				"anotherObject" : {"t": "object", "rules": {"prop1": {"t": "string"}}},
 				"@...t": "string",
-				"aReferenceToRoot" : {"t": "string", "d" : "$$rootVarSetFromSomeObject"}
+				"aReferenceToRoot" : {"t": "bool", "d" : "$$rootVarSetFromSomeObject"}
 			}
 		}
 		}

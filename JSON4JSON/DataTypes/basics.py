@@ -15,7 +15,9 @@ class DataType:
 			return True
 		return False
 	#data - the data provided from the config file. rule - the rules for this property.
-	def convert(self, data, rule, parentUID="ROOT"):
+	def convert(self, data, ruleset, parentUID="ROOT"):
+		if type(data) != self.t:
+			raise Exception("Invalid type!")
 		return data
 
 
@@ -90,9 +92,13 @@ class arrayType(DataType):
 		minLength = self.j4j.get_property(rules, "minLength", parentUID, noneFound=0)
 		maxLength = self.j4j.get_property(rules, "maxLength", parentUID, noneFound=math.inf)
 		if len(data) < minLength:
-			self.j4j.log("Array too short!", error=True)
+			self.j4j.error(f"Array too short!")
 		if len(data) > maxLength:
 			data = data[:maxLength]
+		if 'rule' not in rules:
+			defType = self.j4j.get_property(rules, "rule", parentUID, noneFound=self.j4j.get_object(parentUID)['_defaults']['t'])
+			if defType == "array": defType = "string"
+			rules['rule'] = {"t": defType}
 		
 		for x,i in zip(data, range(0, len(data))):
 			#convert single
@@ -100,5 +106,5 @@ class arrayType(DataType):
 			#check if we have any custom defined rules
 			if f"rule#{i}" in rules:
 				usedRule = rules[f'rule#{i}']
-			data[i] = self.j4j.convert_single(x, usedRule, parentUID=parentUID)
+			data[i] = self.j4j.convert_single(x, usedRule, parentUID=parentUID, name=x)
 		return data

@@ -1,3 +1,4 @@
 {
-	"someProperty": "this is a string, //and this is a comment"
+	"someProperty": "this is a string, //and this is a comment",
+	"iAmANumber": 16
 }

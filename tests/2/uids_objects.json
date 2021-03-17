@@ -1,0 +1,76 @@
+{
+    "ROOT": {
+        "_defaults": {
+            "unit": {
+                "time": "s",
+                "distance": "m"
+            },
+            "autoAdd": true,
+            "t": "string",
+            "r": false,
+            "options": [
+                "yes",
+                "no"
+            ]
+        },
+        "_uid": "ROOT",
+        "_variables": {
+            "rootVarHere": "this is a string, //and this is a comment",
+            "rootVarSetFromSomeObject": false
+        },
+        "_parent": "ROOT"
+    },
+    "someProperty": "this is a string, //and this is a comment",
+    "youBetterAddThis": "no",
+    "_uid": "ROOT",
+    "_parent": "ROOT",
+    "2": {
+        "_uid": "2",
+        "_parent": "ROOT",
+        "_variables": {},
+        "aValue": 0.0,
+        "aBool": false
+    },
+    "7": {
+        "_uid": "7",
+        "_parent": "ROOT",
+        "_variables": {
+            "aLocalVariable": "thing no. 3"
+        },
+        "thing": 0.0,
+        "thing2": [],
+        "thing3": "thing no. 3",
+        "nestedObject": {
+            "_uid": "11",
+            "_parent": "7",
+            "_variables": {},
+            "prop1": [],
+            "anotherObject": {
+                "_uid": "13",
+                "_parent": "11",
+                "_variables": {},
+                "prop1": ""
+            },
+            "aReferenceToRoot": false
+        }
+    },
+    "11": {
+        "_uid": "11",
+        "_parent": "7",
+        "_variables": {},
+        "prop1": [],
+        "anotherObject": {
+            "_uid": "13",
+            "_parent": "11",
+            "_variables": {},
+            "prop1": ""
+        },
+        "aReferenceToRoot": false
+    },
+    "13": {
+        "_uid": "13",
+        "_parent": "11",
+        "_variables": {},
+        "prop1": ""
+    }
+}

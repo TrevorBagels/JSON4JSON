@@ -6,11 +6,8 @@ from colorama.ansi import Fore
 
 class DBG:
 	def __init__(self, devmode):
-		if devmode == False: return
-		from colorama import init as colorInit
-		from colorama import Fore
 		self.colors = {"red": Fore.RED, "green": Fore.GREEN, "blue": Fore.BLUE, "yellow": Fore.YELLOW, "orange": Fore.LIGHTRED_EX, "purple": Fore.MAGENTA}
-		colorInit() #for testing
+		colorama.init() #for testing
 	def print(self, *args, color="green"):
 		c = Fore.CYAN
 		if color in self.colors: c = self.colors[color]
@@ -41,13 +38,14 @@ class JSON4JSON:
 		self.objects   = {"ROOT": self.data} #this keeps track of object hierarchy
 		self.uidLevel = 0 #for keeping track object hierarchy
 		#globals are properties for how JSON4JSON functions. Mostly for logging and stuff. Accessed via "@@property"
-		self.globals = {"logging": 4, "tracebackLogging": True}
+		self.globals = {"logging": 4, "tracebackLogging": False}
 		#defaults are the default properties of objects. 
 		self.defaults = {
 			"unit": {"time": "s", "distance": "m"},
 			"autoAdd": True,
 			"t": "string",
-			"r" : False
+			"r" : False,
+			"options": ["yes", "no"]
 		}
 		self.data["_defaults"] = self.defaults
 		self.data["_uid"] = "ROOT"
@@ -69,7 +67,7 @@ class JSON4JSON:
 			with open(jsonFile, "r") as f:
 				data = json.loads(f.read())
 		except:
-			self.log(f"Could not read JSON file \"{jsonFile}\"", error=True)	
+			self.error(f"Could not read JSON file \"{jsonFile}\"")
 		with open(ruleFile, "r") as f:
 			self.rules = json.loads(f.read())
 		self.convert_all(data, self.rules)
@@ -77,9 +75,9 @@ class JSON4JSON:
 	def convert_all(self, data, rules): #data: dictionary (right after loading json), rules: dictionary from the raw json stuff...
 		#this basically wraps everything into one object and then starts recursively converting it
 		self.init_self_variables()
-		self.data = self.convert_single(data, {"t": "object", "rules": rules}, parentUID="ROOT")
+		self.data = self.convert_single(data, {"t": "object", "rules": rules}, parentUID="ROOT", name="root", setUID="ROOT")
 	
-	def convert_single(self, property, ruleset, setUID=None, parentUID="ROOT"):
+	def convert_single(self, property, ruleset, setUID=None, parentUID="ROOT", name=""):
 		#property = property value (not name) (from config)
 		#allow comments on property values
 		if type(property) == str:
@@ -95,25 +93,31 @@ class JSON4JSON:
 		#data = self.test_variable(data, parent, rule=rule) #does this start with $? if so, it's a variable.
 		
 		expectedType = self.get_property(ruleset, "t", parentUID, noneFound="any")
-		
 		if expectedType in self.dataTypes:
+			property = self.test_variable(property, parentUID, ruleset)
 			isValid = self.dataTypes[expectedType].matches(property) #whether or not this matches the expected datatype
 			if isValid:
 				#wait. is this a dict? if so, we need to pass the parent dictionary's defaults and variables
 				if type(property) == dict:
 					property["_uid"] = uid
 					property["_parent"] = parentUID
-					self.objects[uid] = property
+					if uid not in self.objects:
+						self.objects[uid] = property
+					else:
+						self.merge_dicts(self.objects, property)
 					property = self.dataTypes[expectedType].convert(property, ruleset, parentUID=parentUID)
 				elif type(property) == list:
 					property = self.dataTypes[expectedType].convert(property, ruleset, parentUID=parentUID)
 				else:
-					property = self.dataTypes[expectedType].convert(property, ruleset)
+					property = self.dataTypes[expectedType].convert(property, ruleset, parentUID=parentUID)
+			else:
+				self.error(f"Property \"{name}\" is supposed to be {expectedType}. Got \"{type(property).__name__}\" instead.")
 		else:
 			raise Exception(f"Invallid DataType \"{expectedType}\"")
 		return property
 	
 	#returns the parent object
+
 
 	def get_parent(self, propertyUID, level=1):
 		"""Gets the parent of an object
@@ -171,14 +175,24 @@ class JSON4JSON:
 			ruleset['t'] = self.get_property(property['_defaults'], 't', property['_parent']) #default is "string"
 		#return the default if it exists
 		if "d" in ruleset:
-			return self.get_property(ruleset, "d", property["_parent"])
+			defaults = self.get_property(ruleset, "d", property["_parent"])
+			if type(defaults) == list and ruleset['t'] != "array":
+				#go through the list of default choices until we find one that works/matches
+				for d in defaults:
+					newD = self.get_property({'a':d}, 'a', property['_uid'])
+					if self.dataTypes[ruleset['t']].matches(newD):
+						return newD
+				return None
+			else:
+				return defaults
 		#no default, return the default specified in the DataType.
 		return copy.deepcopy(self.dataTypes[ruleset['t']].default) #last resort, pretty common, just use the default value associated with this type.
 	
-	def test_variable(self, property, parentUID, ruleset, root=0):#run pretty much every value through this function in case it's a ref to a variable
+	def test_variable(self, property, parentUID, ruleset, root=0, checked=""):#run pretty much every value through this function in case it's a ref to a variable
+		#self.print(checked.count("/")*"_"+"_", "-"*root, parentUID, property)
+		checked += "/" + parentUID
 		if type(property) == str and property.startswith("$"):#it's a variable
 			if property.startswith("$$"):#it's a user defined variable
-				variable = property.split("$$")[1]
 				parentLevel = property.count(".")
 				variable = property.split("$$" + (property.count(".") * ".") )[1] #this works, don't question it.
 
@@ -190,17 +204,21 @@ class JSON4JSON:
 					if parentUID == "ROOT":
 						root += 1
 					if root < 2:
-						return self.test_variable(property[:2] + "." + property[2:], parentUID, ruleset, root=root)
-					self.log(f"Variable \"{variable}\" does not exist!", level=5)
+						next = target_parent['_uid']
+						if next == parentUID:
+							next = target_parent["_parent"]
+
+						return self.test_variable(property, next, ruleset, root=root, checked=checked)
+					self.warn(f"Variable \"{variable}\" does not exist!", checked)
 			else:
 				#ok so it's a special type of variable, possibly $prompt or $arg.
 				varTypeName = property.split("$")[1].split(" ")[0]
 				if varTypeName in self.varTypes:
 					varType = self.varTypes[varTypeName]
 					if varType == None:
-						self.log(f"No such varType \"{varTypeName}\"", error=True)
+						raise Exception(f"No such varType \"{varTypeName}\"")
 					else:
-						return varType.get_value(ruleset)
+						return varType.get_value(ruleset, property)
 		return property
 	
 	def get_property(self, dictionary: dict, key: str, parentUID: str, noneFound=None):
@@ -250,6 +268,15 @@ class JSON4JSON:
 		"""
 		self.merge_dicts(dictionary, {key: newValue})
 	
+	def error(self, *args):
+		print(colorama.Fore.RED+"", *args)
+		if self.globals['tracebackLogging']:
+			raise Exception(*args)
+		sys.exit()
+	
+	def warn(self, *args, level=4):
+		if self.globals['logging'] <= level:
+			print(colorama.Fore.YELLOW, *args)
 
 	def log(self, *args, **kw):
 		level = kw.get('level', 0)

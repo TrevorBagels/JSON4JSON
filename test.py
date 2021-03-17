@@ -5,7 +5,7 @@ import objgraph
 
 config = JSON4JSON()
 
-path = "./tests/1/"
+path = "./tests/3/"
 
 config.load(f"{path}config.json", f"{path}rules.json")
 print("\n\n")
@@ -48,4 +48,5 @@ objgraph.show_refs(config.data, max_depth=8)
 #this is good for getting a reference for what your config object will look like when you use advancedJSON
 json.dump(config.data, open(f"{path}output.json", "w+"), indent=4)
 json.dump(config.rules, open(f"{path}outputtedRules.json", "w+"), indent=4)
+json.dump(config.objects, open(f"{path}uids_objects.json", "w+"), indent=4)
 

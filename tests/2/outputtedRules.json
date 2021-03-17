@@ -29,7 +29,7 @@
     },
     "anotherNumber": {
         "r": false,
-        "t": "number"
+        "t": "string"
     },
     "//should be a number again": "",
     "someObject2": {
@@ -40,7 +40,10 @@
             },
             "@t": "array",
             "thing2": {
-                "t": "array"
+                "t": "array",
+                "rule": {
+                    "t": "string"
+                }
             },
             "thing3": {
                 "t": "string",
@@ -51,7 +54,10 @@
                 "t": "object",
                 "rules": {
                     "prop1": {
-                        "t": "array"
+                        "t": "array",
+                        "rule": {
+                            "t": "string"
+                        }
                     },
                     "anotherObject": {
                         "t": "object",
@@ -63,7 +69,7 @@
                     },
                     "@...t": "string",
                     "aReferenceToRoot": {
-                        "t": "string",
+                        "t": "bool",
                         "d": "$$rootVarSetFromSomeObject"
                     }
                 }

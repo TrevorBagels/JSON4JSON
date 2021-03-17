@@ -11,6 +11,12 @@
         "min": 300,
         "max": 850
     },
+    "scanInterval": {
+        "t": "time",
+        "d": "60s",
+        "varSet": "scanIntervalDefault",
+        "unit": "ms"
+    },
     "radiusDefault": {
         "t": "distance",
         "d": "50m",
@@ -33,12 +39,6 @@
             "errors",
             "verbose"
         ]
-    },
-    "scanInterval": {
-        "t": "time",
-        "d": "60s",
-        "varSet": "scanIntervalDefault",
-        "unit": "ms"
     },
     "testProperty": {
         "t": "time",
@@ -65,7 +65,10 @@
         }
     },
     "typeFilters": {
-        "t": "blacklist",
+        "t": "array",
+        "rule": {
+            "t": "string"
+        },
         "d": [
             "*"
         ],

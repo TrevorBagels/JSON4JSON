@@ -1,0 +1,39 @@
+{
+    "ROOT": {
+        "_defaults": {
+            "unit": {
+                "time": "s",
+                "distance": "m"
+            },
+            "autoAdd": true,
+            "t": "string",
+            "r": false,
+            "options": [
+                "yes",
+                "no"
+            ]
+        },
+        "_uid": "ROOT",
+        "_variables": {
+            "someSchema": {
+                "_uid": "5",
+                "_parent": "ROOT",
+                "_variables": {},
+                "thing": 0.0,
+                "thing2": "aaaa"
+            }
+        },
+        "_parent": "ROOT"
+    },
+    "someProperty": "this is a string, //and this is a comment",
+    "iAmANumber": 16,
+    "_uid": "ROOT",
+    "_parent": "ROOT",
+    "5": {
+        "_uid": "5",
+        "_parent": "ROOT",
+        "_variables": {},
+        "thing": 0.0,
+        "thing2": "aaaa"
+    }
+}

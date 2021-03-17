@@ -1,5 +1,6 @@
 from copy import deepcopy, copy
 from ..JSON4JSON import JSON4JSON
+from .basics import DataType
 class dictType:
 	def __init__(self, ajson : JSON4JSON):
 		self.name = "object"
@@ -51,11 +52,13 @@ class dictType:
 				if self.j4j.get_property(ruleset, "r", parentUID, noneFound=data["_defaults"]['r']):
 					raise Exception(f"Property with key \"{propertyName}\" was not found in the config file. ")
 			
+			autoAdd = self.j4j.get_property(ruleset, "autoAdd", parentUID, noneFound=data["_defaults"]['autoAdd'])
 			#if this property wasn't supplied, and autoAdd is enabled
-			if propertyName not in data and self.j4j.get_property(ruleset, "autoAdd", parentUID, noneFound=data["_defaults"]['autoAdd']):
+			if propertyName not in data and autoAdd:
 				#add the property, assign it to it's default value
 				data[propertyName] = self.j4j.get_default(ruleset, data)
-			
+			if propertyName not in data and autoAdd == False:
+				continue
 			
 			#check if this makes a variable. if so, set the variable to the value.
 			if "varSet" in ruleset:
@@ -75,5 +78,6 @@ class dictType:
 				data[propertyName] = self.j4j.convert_single(
 					self.j4j.get_property(data, propertyName, parentUID),
 					ruleset,
-					parentUID=data["_uid"])
+					parentUID=data["_uid"],
+					name=propertyName)
 		return data

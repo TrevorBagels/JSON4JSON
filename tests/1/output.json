@@ -21,7 +21,12 @@
                     "distance": "m"
                 },
                 "autoAdd": true,
-                "t": "string"
+                "t": "string",
+                "r": false,
+                "options": [
+                    "yes",
+                    "no"
+                ]
             },
             "_variables": {},
             "scanInterval": 60.0
@@ -37,7 +42,12 @@
                     "distance": "m"
                 },
                 "autoAdd": true,
-                "t": "string"
+                "t": "string",
+                "r": false,
+                "options": [
+                    "yes",
+                    "no"
+                ]
             },
             "_variables": {}
         }
@@ -55,7 +65,7 @@
                 " normally this would throw an error since lat. is supposed to be between -90 and 90, but index specific rules are set up for the coords property, and they have min/max rules as well."
             ],
             "radius": 2000.0,
-            "_uid": "17",
+            "_uid": "18",
             "_parent": "ROOT",
             "_defaults": {
                 "unit": {
@@ -63,7 +73,12 @@
                     "distance": "m"
                 },
                 "autoAdd": true,
-                "t": "string"
+                "t": "string",
+                "r": false,
+                "options": [
+                    "yes",
+                    "no"
+                ]
             },
             "_variables": {},
             "address": "",
@@ -73,7 +88,7 @@
             "name": "test 2",
             "match": "VANCOUVER AVE",
             "importance": 3,
-            "_uid": "25",
+            "_uid": "26",
             "_parent": "ROOT",
             "_defaults": {
                 "unit": {
@@ -81,39 +96,20 @@
                     "distance": "m"
                 },
                 "autoAdd": true,
-                "t": "string"
+                "t": "string",
+                "r": false,
+                "options": [
+                    "yes",
+                    "no"
+                ]
             },
             "_variables": {},
             "address": "",
             "radius": 100.0
         }
     ],
-    "icloud": {
-        "_uid": "30",
-        "_parent": "ROOT",
-        "_defaults": {
-            "unit": {
-                "time": "s",
-                "distance": "m"
-            },
-            "autoAdd": true,
-            "t": "string"
-        },
-        "_variables": {},
-        "importContacts": false,
-        "username": "none",
-        "password": "none"
-    },
     "_uid": "ROOT",
     "_parent": "ROOT",
-    "_defaults": {
-        "unit": {
-            "time": "s",
-            "distance": "m"
-        },
-        "autoAdd": true,
-        "t": "string"
-    },
     "_variables": {},
     "logging": "none",
     "testProperty": 60.0,

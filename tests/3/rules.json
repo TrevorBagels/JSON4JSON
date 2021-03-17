@@ -1,6 +1,8 @@
 {
 	"iwillprompt": {"t": "number", "d": "$prompt gimme a number boi"},
-	"icanarg": {"t": "string", "d": "$arg --thing"},
+	"iAmANumber": {"t": "number", "r": true},
+	"icanarg": {"t": "string", "d": ["$arg --thing", "here's a string"]},
+	"icanargasanumber": {"t": "number", "d": ["$arg --num", 22]},
 	"someSchema": {"t": "object", "varSet": "someSchema", "autoAdd": true, "rules":{
 			"thing": {"t": "number"},
 			"thing2": {"t": "string", "d": "aaaa"}

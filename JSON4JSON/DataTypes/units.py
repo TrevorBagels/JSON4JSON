@@ -15,13 +15,13 @@ class unit(DataType):
 			else:
 				self.j4j.log(f"Error: {self.name} does not recognize \"{seperate_string_number(data)[1]}\" as a valid unit.", level=5)
 		return False
-	def convert(self, data, rule, skipRuleConversion=False, useUnit="none"):#useUnit, if not set to none, skips looking through the rule file and uses whatever it's set to as the new unit.
-		unitToUse = self.j4j.defaults['unit'][self.name]
+	def convert(self, data, rule, skipRuleConversion=False, useUnit=None, parentUID="ROOT"):#useUnit, if not set to none, skips looking through the rule file and uses whatever it's set to as the new unit.
+		unitToUse = self.j4j.get_object(parentUID)['_defaults']['unit'][self.name]
 		#check if there's a rule for this, that would ovverride unitToUse
 		if skipRuleConversion == False:
 			if "unit" in rule:
 				unitToUse = rule['unit']
-		if useUnit != "none":
+		if useUnit != None:
 			unitToUse = useUnit
 		
 		if skipRuleConversion == False:
@@ -29,11 +29,12 @@ class unit(DataType):
 			for x in alsoConvert:
 				if x in rule:
 					rule[x] = self.convert(rule[x], rule, skipRuleConversion=True, useUnit=unitToUse)
+		
 		value = seperate_string_number(data) #gets the number and then the units
 		valueInDefaultUnits = self.units[value[1]] * float(value[0]) #converts whatever units were used to seconds/meters
 
 		valueInDesiredUnits = valueInDefaultUnits / self.units[unitToUse] #converts to the value we should be using
-		numberValue = self.j4j.dataTypes['number'].convert(valueInDesiredUnits, rule)
+		numberValue = self.j4j.dataTypes['number'].convert(valueInDesiredUnits, rule, parentUID=parentUID) #do normal number conversions
 		return numberValue
 
 

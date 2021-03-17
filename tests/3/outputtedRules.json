@@ -3,9 +3,23 @@
         "t": "number",
         "d": "$prompt gimme a number boi"
     },
+    "iAmANumber": {
+        "t": "number",
+        "r": true
+    },
     "icanarg": {
         "t": "string",
-        "d": "$arg --thing"
+        "d": [
+            "$arg --thing",
+            "here's a string"
+        ]
+    },
+    "icanargasanumber": {
+        "t": "number",
+        "d": [
+            "$arg --num",
+            22
+        ]
     },
     "someSchema": {
         "t": "object",

@@ -3,8 +3,11 @@ from JSON4JSON import JSON4JSON
 import json
 import objgraph
 
-config = JSON4JSON()
+def reverse(data, ruleset, j4j, parentUID):
+	return data[::-1]
 
+config = JSON4JSON()
+config.add_transform(reverse, name='reverse')
 path = "./tests/3/"
 
 config.load(f"{path}config.json", f"{path}rules.json")

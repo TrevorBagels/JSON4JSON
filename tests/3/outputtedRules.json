@@ -1,24 +1,42 @@
 {
     "iwillprompt": {
         "t": "number",
-        "d": "$prompt gimme a number boi"
+        "d": "$prompt gimme a number boi",
+        "transforms": []
     },
     "iAmANumber": {
         "t": "number",
-        "r": true
+        "r": true,
+        "transforms": []
     },
     "icanarg": {
         "t": "string",
         "d": [
             "$arg --thing",
             "here's a string"
-        ]
+        ],
+        "transforms": []
     },
     "icanargasanumber": {
         "t": "number",
         "d": [
             "$arg --num",
             22
+        ],
+        "transforms": []
+    },
+    "reverseMe": {
+        "t": "string",
+        "d": "racecar?",
+        "transforms": [
+            "reverse"
+        ]
+    },
+    "reverseMeToo": {
+        "t": "string",
+        "d": "racecar?",
+        "transforms": [
+            "reverse"
         ]
     },
     "someSchema": {
@@ -27,12 +45,15 @@
         "autoAdd": true,
         "rules": {
             "thing": {
-                "t": "number"
+                "t": "number",
+                "transforms": []
             },
             "thing2": {
                 "t": "string",
-                "d": "aaaa"
+                "d": "aaaa",
+                "transforms": []
             }
-        }
+        },
+        "transforms": []
     }
 }

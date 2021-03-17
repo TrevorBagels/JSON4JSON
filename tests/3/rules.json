@@ -3,9 +3,6 @@
 	"iAmANumber": {"t": "number", "r": true},
 	"icanarg": {"t": "string", "d": ["$arg --thing", "here's a string"]},
 	"icanargasanumber": {"t": "number", "d": ["$arg --num", 22]},
-	"someSchema": {"t": "object", "varSet": "someSchema", "autoAdd": true, "rules":{
-			"thing": {"t": "number"},
-			"thing2": {"t": "string", "d": "aaaa"}
-		}
-	}
+	"reverseMe": {"t": "string", "d": "racecar?", "transforms": ["reverse"]},
+	"reverseMeToo": {"t": "string:reverse", "d": "racecar?"}
 }

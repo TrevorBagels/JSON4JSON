@@ -26,6 +26,7 @@ class JSON4JSON:
 		self.init_self_variables()
 		self.dataTypes = {}
 		self.varTypes  = {}
+		self.transforms = {}
 		DefaultTypes.LoadDefaultDatatypes(self) #user created datatypes can be added via the method in this method as well
 		DefaultVarTypes.LoadDefaultVarTypes(self)
 		#something like 
@@ -60,6 +61,10 @@ class JSON4JSON:
 		varTypeInstance = varType(self)
 		self.varTypes[varTypeInstance.name] = varTypeInstance
 	
+	def add_transform(self, transform, name=""):
+		if name == "": name = transform.__name__
+		self.transforms[name] = transform
+
 	def load(self, jsonFile, ruleFile):
 		data = None
 		self.rules = None
@@ -89,10 +94,14 @@ class JSON4JSON:
 		uid = setUID
 		if uid == None:
 			uid = self.generate_uid()
-		
+		#make sure that any transforms made in the type are added to the transforms list
+		if 'transforms' not in ruleset: ruleset['transforms'] = []
+
 		#data = self.test_variable(data, parent, rule=rule) #does this start with $? if so, it's a variable.
 		
-		expectedType = self.get_property(ruleset, "t", parentUID, noneFound="any")
+		
+		
+		expectedType = self.get_property(ruleset, "t", parentUID, noneFound="any").split(":")[0]
 		if expectedType in self.dataTypes:
 			property = self.test_variable(property, parentUID, ruleset)
 			isValid = self.dataTypes[expectedType].matches(property) #whether or not this matches the expected datatype
@@ -106,10 +115,13 @@ class JSON4JSON:
 					else:
 						self.merge_dicts(self.objects, property)
 					property = self.dataTypes[expectedType].convert(property, ruleset, parentUID=parentUID)
+					property = self.apply_transforms(property, ruleset, parentUID)
 				elif type(property) == list:
 					property = self.dataTypes[expectedType].convert(property, ruleset, parentUID=parentUID)
+					property = self.apply_transforms(property, ruleset, parentUID)
 				else:
 					property = self.dataTypes[expectedType].convert(property, ruleset, parentUID=parentUID)
+					property = self.apply_transforms(property, ruleset, parentUID)
 			else:
 				self.error(f"Property \"{name}\" is supposed to be {expectedType}. Got \"{type(property).__name__}\" instead.")
 		else:
@@ -118,6 +130,18 @@ class JSON4JSON:
 	
 	#returns the parent object
 
+	def apply_transforms(self, property, ruleset, parentUID):
+		t = self.get_property(ruleset, "t", parentUID, noneFound="any")
+		if ":" in t:
+			for transform in t.split(":")[1].split(","):
+				ruleset['transforms'].append(transform)
+			ruleset['t'] = t.split(":")[0]
+		for transform in ruleset['transforms']:
+			if transform == "": continue
+			if transform not in self.transforms:
+				raise Exception(f"Transform \"{transform}\" does not exist or was never added.")
+			property = self.transforms[transform](property, ruleset, self, parentUID)
+		return property
 
 	def get_parent(self, propertyUID, level=1):
 		"""Gets the parent of an object

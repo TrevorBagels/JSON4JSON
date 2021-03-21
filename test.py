@@ -6,7 +6,7 @@ import objgraph
 def reverse(data, ruleset, j4j, parentUID):
 	return data[::-1]
 
-config = JSON4JSON()
+config = JSON4JSON()	
 config.add_transform(reverse, name='reverse')
 path = "./tests/3/"
 

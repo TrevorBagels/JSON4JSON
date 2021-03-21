@@ -1,7 +1,7 @@
 {
     "iwillprompt": {
         "t": "number",
-        "d": "$prompt gimme a number boi",
+        "d": "$prompt gimme a number boi: ",
         "transforms": []
     },
     "iAmANumber": {
@@ -34,25 +34,36 @@
     },
     "reverseMeToo": {
         "t": "string",
-        "d": "racecar?",
+        "d": "tacocat?",
         "transforms": [
             "reverse"
         ]
     },
-    "someSchema": {
-        "t": "object",
-        "varSet": "someSchema",
-        "autoAdd": true,
-        "rules": {
-            "thing": {
-                "t": "number",
-                "transforms": []
+    "customList": {
+        "t": "keyvaluepair",
+        "rule": {
+            "t": "object",
+            "rules": {
+                "val1": {
+                    "t": "number",
+                    "transforms": []
+                },
+                "val2": {
+                    "t": "string",
+                    "d": "hahahahah",
+                    "transforms": []
+                }
             },
-            "thing2": {
-                "t": "string",
-                "d": "aaaa",
-                "transforms": []
-            }
+            "transforms": []
+        },
+        "transforms": []
+    },
+    "anotherCustomList": {
+        "t": "keyvaluepair",
+        "rule": {
+            "t": "number",
+            "min": 60,
+            "transforms": []
         },
         "transforms": []
     }

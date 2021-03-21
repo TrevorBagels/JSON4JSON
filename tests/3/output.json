@@ -1,19 +1,24 @@
 {
     "someProperty": "this is a string, //and this is a comment",
     "iAmANumber": 16.0,
-    "_uid": "ROOT",
-    "_parent": "ROOT",
-    "_variables": {},
-    "iwillprompt": 2.0,
+    "customList": {
+        "thing_1": {
+            "val1": 0.0,
+            "val2": "hahahahah"
+        },
+        "thing_2": {
+            "val1": 100000.0,
+            "val2": "hahahahah"
+        }
+    },
+    "anotherCustomList": {
+        "a": 2222.0,
+        "b": 60,
+        "c": 60
+    },
+    "iwillprompt": 123.0,
     "icanarg": "here's a string",
     "icanargasanumber": 22.0,
     "reverseMe": "?racecar",
-    "reverseMeToo": "?racecar",
-    "someSchema": {
-        "_uid": "7",
-        "_parent": "ROOT",
-        "_variables": {},
-        "thing": 0.0,
-        "thing2": "aaaa"
-    }
+    "reverseMeToo": "?tacocat"
 }

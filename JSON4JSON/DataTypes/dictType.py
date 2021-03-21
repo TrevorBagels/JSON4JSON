@@ -1,6 +1,30 @@
 from copy import deepcopy, copy
 from ..JSON4JSON import JSON4JSON
 from .basics import DataType
+
+class dictList(DataType):
+	def __init__(self, j4j: JSON4JSON):
+		super().__init__(j4j)
+		self.name = "keyvaluepair"
+		self.t = dict
+		self.j4j = j4j
+		self.default = {}
+	def matches(self, data):
+		return super().matches(data)
+	def convert(self, data, ruleset, parentUID="ROOT"):
+		if 'rule' not in ruleset:
+			ruleset['rule'] = {}
+		#now we basically go through each item in the data, convert it using the ruleset['rule'] as the ruleset and the item as the data
+		for key in data:
+			data[key] = self.j4j.convert_single(
+					data[key],
+					ruleset['rule'],
+					parentUID=parentUID,
+					name=key)
+		return data
+
+
+
 class dictType:
 	def __init__(self, ajson : JSON4JSON):
 		self.name = "object"

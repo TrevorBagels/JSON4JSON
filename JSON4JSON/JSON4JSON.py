@@ -34,12 +34,14 @@ class JSON4JSON:
 		#configParser.add_data_type(myCustomDataType)
 	
 	def init_self_variables(self):
+		"""Initializes variables/resets most data
+		"""
 		self.vars      = {}
 		self.data      = {} #this is the loaded and mostly filtered data
 		self.objects   = {"ROOT": self.data} #this keeps track of object hierarchy
 		self.uidLevel = 0 #for keeping track object hierarchy
 		#globals are properties for how JSON4JSON functions. Mostly for logging and stuff. Accessed via "@@property"
-		self.globals = {"logging": 4, "tracebackLogging": False}
+		self.globals = {"logging": 4, "tracebackLogging": False, "removeHidden": True}
 		#defaults are the default properties of objects. 
 		self.defaults = {
 			"unit": {"time": "s", "distance": "m"},
@@ -54,33 +56,96 @@ class JSON4JSON:
 		self.data['_parent'] = "ROOT"
 
 	def add_data_type(self, dataType):#renamed from addDataType
+		"""Adds a new DataType to this JSON4JSON object.
+
+		Args:
+			dataType (DataType): The DataType to add.
+		"""
 		dataTypeInstance = dataType(self)
 		self.dataTypes[dataTypeInstance.name] = dataTypeInstance
 	
 	def add_var_type(self, varType):
+		"""Adds a variable type to this JSON4JSON object
+
+		Args:
+			varType (VarType): The variable type to add
+		"""
 		varTypeInstance = varType(self)
 		self.varTypes[varTypeInstance.name] = varTypeInstance
 	
 	def add_transform(self, transform, name=""):
+		"""Adds a transform to this JSON4JSON object
+
+		Args:
+			transform (function): The function used to transform the property (after processing)
+			name (str, optional): The name of the transformation. Defaults to "".
+		"""
 		if name == "": name = transform.__name__
 		self.transforms[name] = transform
 
 	def load(self, jsonFile, ruleFile):
+		"""Loads from a file
+
+		Args:
+			jsonFile (path): The file to load data from
+			ruleFile (path): The file containing the rules.
+		"""
 		data = None
 		self.rules = None
 		try:
 			with open(jsonFile, "r") as f:
-				data = json.loads(f.read())
+				dataString = f.read()
 		except:
-			self.error(f"Could not read JSON file \"{jsonFile}\"")
-		with open(ruleFile, "r") as f:
-			self.rules = json.loads(f.read())
-		self.convert_all(data, self.rules)
+			self.error(f"Could not find file \"{jsonFile}\"")
+		try:
+			with open(ruleFile, "r") as f:
+				rulesString = f.read()
+		except:
+			self.error(f"Could not find rules file \"{ruleFile}\"")
+		
+		self.loads(dataString, rulesString)
 	
+	def loads(self, data, rules):
+		"""Loads data from a string
+
+		Args:
+			data (string): The json data
+			rules (string): The rules for the json data
+		"""
+		data = json.loads(data)
+		self.rules = json.loads(rules)
+		return self.load_dict(data, self.rules)
+		
+	def load_dict(self, data, rules):
+		"""Loads data from a dictionary
+
+		Args:
+			data (dict): The data provided by the user
+			rules (dict): The rules provided by the developer
+		"""
+		self.rules = rules
+		return self.convert_all(data, rules)
+
+	def remove_keys(self, d, keys=["_parent", "_uid", "_variables", "_defaults"]):
+		doItAgain = False
+		for key in d:
+			if key in keys:
+				#reMOVE
+				del d[key]
+				doItAgain = True
+				break
+			if type(d[key]) == dict:
+				self.remove_keys(d[key], keys=keys)
+		if doItAgain:
+			self.remove_keys(d, keys=keys)	
+
 	def convert_all(self, data, rules): #data: dictionary (right after loading json), rules: dictionary from the raw json stuff...
 		#this basically wraps everything into one object and then starts recursively converting it
 		self.init_self_variables()
 		self.data = self.convert_single(data, {"t": "object", "rules": rules}, parentUID="ROOT", name="root", setUID="ROOT")
+		if self.globals['removeHidden']:
+			self.remove_keys(self.data)
+		return self.data
 	
 	def convert_single(self, property, ruleset, setUID=None, parentUID="ROOT", name=""):
 		#property = property value (not name) (from config)
@@ -102,12 +167,13 @@ class JSON4JSON:
 		
 		
 		expectedType = self.get_property(ruleset, "t", parentUID, noneFound="any").split(":")[0]
+		print(name, expectedType, ruleset)
 		if expectedType in self.dataTypes:
 			property = self.test_variable(property, parentUID, ruleset)
 			isValid = self.dataTypes[expectedType].matches(property) #whether or not this matches the expected datatype
 			if isValid:
 				#wait. is this a dict? if so, we need to pass the parent dictionary's defaults and variables
-				if type(property) == dict:
+				if type(property) == dict and expectedType != "keyvaluepair":
 					property["_uid"] = uid
 					property["_parent"] = parentUID
 					if uid not in self.objects:
@@ -275,7 +341,7 @@ class JSON4JSON:
 			[type]: [description]
 		"""
 		for x in d2:
-			if type(d2[x]) not in [dict, list]:
+			if type(d2[x]) not in [dict, list] or x not in d1:
 				d1[x] = d2[x]
 			elif type(d2[x]) == dict:
 				self.merge_dicts(d1[x], d2[x])

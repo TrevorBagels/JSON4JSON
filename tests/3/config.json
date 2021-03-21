@@ -1,4 +1,12 @@
 {
 	"someProperty": "this is a string, //and this is a comment",
-	"iAmANumber": 16
+	"iAmANumber": 16,
+	"customList": {
+		"thing_1": {}, "thing_2": {"val1": 100000}
+	},
+	"anotherCustomList": {
+		"a": 2222,
+		"b": -2,
+		"c": 0
+	}
 }

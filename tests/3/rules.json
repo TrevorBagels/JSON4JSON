@@ -1,8 +1,16 @@
 {
-	"iwillprompt": {"t": "number", "d": "$prompt gimme a number boi"},
+	"iwillprompt": {"t": "number", "d": "$prompt gimme a number boi: "},
 	"iAmANumber": {"t": "number", "r": true},
 	"icanarg": {"t": "string", "d": ["$arg --thing", "here's a string"]},
 	"icanargasanumber": {"t": "number", "d": ["$arg --num", 22]},
 	"reverseMe": {"t": "string", "d": "racecar?", "transforms": ["reverse"]},
-	"reverseMeToo": {"t": "string:reverse", "d": "racecar?"}
+	"reverseMeToo": {"t": "string:reverse", "d": "tacocat?"},
+	"customList": {"t": "keyvaluepair", "rule": {
+			"t": "object",
+			"rules": {
+				"val1": {"t": "number"}, "val2": {"t": "string", "d": "hahahahah"}
+			}
+		}
+	},
+	"anotherCustomList": {"t": "keyvaluepair", "rule": {"t": "number", "min": 60}}
 }

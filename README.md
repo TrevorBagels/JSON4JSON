@@ -12,7 +12,7 @@ Advanced and easy to use JSON configuration for python. Lets the developer confi
   * Variables (in json!)
   * Rules can apply to specific indexes/ranges of arrays
   * Auto generates missing data, can throw errors if you want it to
-  * NOT abandoned
+  * ~~NOT~~ abandoned
 ## Why does this exist?
 
   Generally, we want our programs to be capable of customization, so that the user can make the program suit their needs. JSON provides a fairly easy way of doing this; the user can edit their preferences in a JSON file without needing to make changes to the source code. 
